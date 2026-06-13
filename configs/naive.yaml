@@ -1,0 +1,27 @@
+collection: raglab_demo
+architecture: naive_rag
+
+embedding:
+  name: hashing
+  dim: 384
+
+vectorstore:
+  name: qdrant
+  location: ":memory:"
+  distance: cosine
+
+retrieval:
+  type: dense
+  k: 5
+
+reranker:
+  name: noop
+
+llm:
+  provider: echo        # offline extractive answerer; swap to openai | openrouter
+  temperature: 0.0
+  max_tokens: 512
+
+observability:
+  langfuse: false
+  langsmith: false

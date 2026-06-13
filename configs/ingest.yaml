@@ -1,0 +1,18 @@
+# Ingestion config. Runs fully offline (hashing embedder, Qdrant in-memory if
+# no QDRANT_URL is set). Swap `embedding.name` to openai/cohere/bge_local to
+# change the embedding model with no code changes.
+collection: raglab_demo
+
+chunker:
+  name: recursive
+  chunk_size: 800
+  overlap: 120
+
+embedding:
+  name: hashing      # offline default; alternatives: openai | cohere | bge_local
+  dim: 384
+
+vectorstore:
+  name: qdrant
+  location: ":memory:"   # set QDRANT_URL env (or url: here) for a persistent server
+  distance: cosine

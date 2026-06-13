@@ -1,0 +1,5 @@
+{"question": "What does RAGLab let researchers compare?", "ground_truth": "RAGLab lets researchers run the same query across many architectures and compare retrieval quality, faithfulness, latency, and cost under identical conditions."}
+{"question": "How does Reciprocal Rank Fusion score documents?", "ground_truth": "RRF scores each document by the sum of 1 / (k + rank) across the result lists it appears in."}
+{"question": "What does the grader do in Agentic RAG?", "ground_truth": "The grader scores whether the retrieved context is relevant and complete, and a low score triggers a query rewrite and retry."}
+{"question": "Which vector database does RAGLab use by default?", "ground_truth": "Qdrant is the default vector database, which can run in-memory for tests or as a Docker service."}
+{"question": "What embedding model does RAGLab use when no API keys are available?", "ground_truth": "An offline hashing embedder is used by default so the platform runs with no API keys."}

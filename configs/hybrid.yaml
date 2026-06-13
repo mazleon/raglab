@@ -1,0 +1,32 @@
+collection: raglab_demo
+architecture: hybrid_rag
+
+embedding:
+  name: hashing
+  dim: 384
+
+vectorstore:
+  name: qdrant
+  location: ":memory:"
+  distance: cosine
+
+retrieval:
+  type: hybrid
+  dense_k: 20
+  bm25_k: 20
+  fusion: rrf        # rrf | mmr
+  rrf_k: 60
+  k: 5               # final fused count handed to the reranker
+
+reranker:
+  name: noop         # swap to cross_encoder (needs [local]) or cohere (needs key)
+  top_n: 5
+
+llm:
+  provider: echo
+  temperature: 0.0
+  max_tokens: 512
+
+observability:
+  langfuse: false
+  langsmith: false

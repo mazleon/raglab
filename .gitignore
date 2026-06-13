@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+reports/
+*.html
+!docs/**/*.html
+.DS_Store
+
+# Agents
+.claude
+.agents
+CLAUDE.md
+AGENTS.md
+docs/ROADMAP.md
