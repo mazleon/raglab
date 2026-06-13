@@ -97,6 +97,39 @@ ruff check src tests
 mypy src
 ```
 
+## Benchmark Results
+
+Run the built-in offline benchmark matrix with:
+
+```bash
+source .venv/bin/activate
+raglab bench --config configs/benchmark.yaml
+```
+
+The runner expands the cartesian product of architectures, embeddings, retrievers, and rerankers defined in `configs/benchmark.yaml`, evaluates each cell against `examples/qa/qa.jsonl`, and writes a ranked leaderboard to `reports/leaderboard-latest.{csv,html}`.
+
+### Latest offline run (5 QA pairs, hashing embedder, echo LLM, in-memory Qdrant)
+
+| Architecture | Retrieval | Context Recall | Answer Relevancy | Answer Non-Empty | Avg Latency |
+|--------------|-----------|----------------|------------------|------------------|-------------|
+| naive_rag    | dense     | 0.9538         | 0.3262           | 1.0000           | 409.06 ms   |
+| naive_rag    | hybrid    | 0.9538         | 0.3262           | 1.0000           | 465.10 ms   |
+| hybrid_rag   | dense     | 0.9538         | 0.3262           | 1.0000           | **389.80 ms** |
+| hybrid_rag   | hybrid    | 0.9538         | 0.3262           | 1.0000           | 480.22 ms   |
+
+Observations on the sample corpus:
+- All four configurations achieved identical quality scores because the small ground-truth set is fully covered by every retriever.
+- `hybrid_rag` with `dense` retrieval was the fastest overall.
+- Adding hybrid retrieval (BM25 + dense + RRF) increased latency without improving proxy metrics on this corpus.
+- All runs cost $0.00 USD and used the offline `echo` LLM, so the leaderboard is reproducible from a clean clone.
+
+To compare approaches with higher fidelity, enable RAGAS in `configs/benchmark.yaml` (requires `[eval]` extra + a judge LLM):
+
+```yaml
+evaluation:
+  ragas: true
+```
+
 ## Architecture
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system / sequence / data-flow
