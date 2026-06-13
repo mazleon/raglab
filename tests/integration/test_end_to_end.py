@@ -2,6 +2,8 @@
 plus a tiny benchmark. Runs fully offline (hashing embedder + in-memory Qdrant +
 echo LLM), so it needs no Docker and no API keys."""
 
+from pathlib import Path
+
 import pytest
 
 from raglab.benchmarks.runner import run_benchmark
@@ -28,6 +30,25 @@ def test_ingest_then_query(config_path):
 
 
 @pytest.mark.integration
+def test_all_architectures_run_offline():
+    """Every registered architecture answers end-to-end on the in-memory store."""
+
+    from raglab.core import registry
+
+    base = load_config("configs/hybrid.yaml")
+    archs = registry.available("architecture")
+    assert len(archs) >= 13
+    for arch in archs:
+        cfg = base.model_copy(deep=True)
+        cfg.architecture = arch
+        engine = build_engine(cfg, ingest_path="examples/docs")
+        result = engine.answer("How does Reciprocal Rank Fusion score documents?")
+        assert result.answer.strip(), f"{arch} produced empty answer"
+        assert result.trajectory, f"{arch} produced no trajectory"
+        assert result.architecture == arch
+
+
+@pytest.mark.integration
 def test_agentic_self_correction_records_trajectory():
     cfg = load_config("configs/agentic.yaml")
     engine = build_engine(cfg, ingest_path="examples/docs")
@@ -40,7 +61,7 @@ def test_agentic_self_correction_records_trajectory():
 def test_benchmark_matrix_produces_leaderboard(tmp_path):
     import yaml
 
-    bench = yaml.safe_load(open("configs/benchmark.yaml"))
+    bench = yaml.safe_load(Path("configs/benchmark.yaml").read_text())
     bench["output_dir"] = str(tmp_path)
     cfg_path = tmp_path / "bench.yaml"
     cfg_path.write_text(yaml.safe_dump(bench))

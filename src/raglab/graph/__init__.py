@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any, Protocol, runtime_checkable
 
 from raglab.core.types import Document, ScoredChunk
+from raglab.graph import neo4j_store, store  # noqa: F401  (registers graphstores)
 
 
 @runtime_checkable

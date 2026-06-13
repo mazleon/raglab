@@ -48,6 +48,9 @@ class Engine:
 
 
 def build_engine(config: ExperimentConfig, ingest_path: str | Path | None = None) -> Engine:
+    from raglab.env import ensure_loaded
+
+    ensure_loaded()
     components = build_components(config)
     pipeline = build_pipeline_from_components(config, components)
     tracer = build_tracer(config.observability)

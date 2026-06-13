@@ -1,3 +1,3 @@
 """Chunkers."""
 
-from raglab.ingestion.chunkers import recursive  # noqa: F401
+from raglab.ingestion.chunkers import recursive, semantic  # noqa: F401

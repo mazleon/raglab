@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import Vector
@@ -15,7 +16,7 @@ class CohereEmbedder:
     def __init__(self, model: str | None = None, dim: int | None = None, **_: object) -> None:
         self._model = model or "embed-english-v3.0"
         self._dim = int(dim or _DIMS.get(self._model, 1024))
-        self._client = None
+        self._client: Any = None
 
     def _ensure(self):
         if self._client is None:

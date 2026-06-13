@@ -8,8 +8,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -123,6 +121,9 @@ def components() -> None:
 
 
 def main() -> None:  # pragma: no cover
+    from raglab.env import ensure_loaded
+
+    ensure_loaded()
     app()
 
 

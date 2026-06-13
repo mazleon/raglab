@@ -47,8 +47,9 @@ Install extras as needed:
 
 | Extra        | Unlocks                                           |
 |--------------|---------------------------------------------------|
-| `providers`  | OpenAI / Cohere embeddings, Cohere Rerank, OpenAI & OpenRouter chat |
+| `providers`  | OpenAI / Cohere / Gemini embeddings, Cohere Rerank, OpenAI & OpenRouter chat |
 | `local`      | BGE/E5 embeddings + local cross-encoder reranker  |
+| `neo4j`      | Neo4j backend for GraphRAG                        |
 | `eval`       | RAGAS metrics                                     |
 | `obs`        | LangFuse tracing                                  |
 | `parsers`    | PDF + DOCX ingestion                              |
@@ -61,9 +62,39 @@ uv pip install -e ".[providers,local,eval,obs,parsers]"
 
 ```bash
 uvicorn raglab.api:app --reload
-# POST /query {"query": "...", "config": "configs/hybrid.yaml", "ingest_path": "examples/docs"}
-# POST /benchmark {"config": "configs/benchmark.yaml"}
-# GET  /architectures   GET /health
+```
+
+Endpoints:
+
+| Method | Path | Body / Response |
+|--------|------|-----------------|
+| GET | `/health` | `{ "status": "ok" }` |
+| GET | `/architectures` | List registered architectures |
+| POST | `/query` | `{query, config, ingest_path?}` |
+| POST | `/benchmark` | `{config}` |
+| GET | `/experiments` | List recorded benchmark experiments |
+| GET | `/dashboard` | HTML experiment dashboard |
+
+Example:
+
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "How does RRF work?", "config": "configs/hybrid.yaml", "ingest_path": "examples/docs"}'
+```
+
+## Testing
+
+```bash
+# Unit tests (no external services)
+pytest tests/unit
+
+# Integration tests (in-memory Qdrant by default)
+pytest tests/integration
+
+# Lint + type check
+ruff check src tests
+mypy src
 ```
 
 ## Architecture
@@ -74,5 +105,6 @@ diagrams and [docs/ROADMAP.md](docs/ROADMAP.md) for what lands in Phases 2–6
 dashboard, compressed retrieval, CI/CD).
 
 Implemented architectures: **Naive RAG**, **Hybrid RAG** (BM25 + dense + RRF/MMR
-+ rerank), **Agentic RAG** (LangGraph self-correcting loop). Ten further
-architectures are registered stubs against the same `Pipeline` interface.
++ rerank), **Agentic RAG** (LangGraph self-correcting loop). The `Pipeline`
+registry also supports stubs for future architectures, so adding a new one only
+requires implementing `run()` — no wiring changes.

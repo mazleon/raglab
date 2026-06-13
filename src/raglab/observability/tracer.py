@@ -35,7 +35,7 @@ class NoopTracer:
 
 class LangFuseTracer:
     def __init__(self) -> None:
-        self._client = None
+        self._client: Any = None
         try:
             from langfuse import Langfuse
 
@@ -48,20 +48,17 @@ class LangFuseTracer:
 
     @contextlib.contextmanager
     def span(self, name: str, **metadata: Any) -> Iterator[None]:
-        if self._client is None:
+        # Support the LangFuse v3/v4 context-manager span API; degrade to no-op
+        # on any error or older/newer SDK shape.
+        start = getattr(self._client, "start_as_current_span", None)
+        if start is None:
             yield
             return
-        trace = None
         try:
-            trace = self._client.trace(name=name, metadata=metadata)
+            with start(name=name, metadata=metadata):
+                yield
         except Exception:  # pragma: no cover
-            trace = None
-        try:
             yield
-        finally:
-            with contextlib.suppress(Exception):
-                if trace is not None:
-                    trace.update(output={"completed": True})
 
     def flush(self) -> None:
         with contextlib.suppress(Exception):

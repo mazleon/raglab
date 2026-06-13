@@ -13,7 +13,7 @@ import json
 import time
 import uuid
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -129,7 +129,7 @@ def run_benchmark(bench_path: str | Path) -> list[dict[str, Any]]:
             "avg_latency_ms": round(total_latency / n, 2),
             "total_cost_usd": round(total_cost, 6),
             "avg_tokens": round(total_tokens / n, 1),
-            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "timestamp": datetime.now(UTC).isoformat(timespec="seconds"),
         }
         rows.append(row)
 
@@ -143,4 +143,9 @@ def run_benchmark(bench_path: str | Path) -> list[dict[str, Any]]:
     write_html(rows, output_dir / f"leaderboard-{stamp}.html")
     write_csv(rows, output_dir / "leaderboard-latest.csv")
     write_html(rows, output_dir / "leaderboard-latest.html")
+
+    # Persist to the experiment store so runs accumulate across sessions.
+    from raglab.experiments.store import save_experiments
+
+    save_experiments(rows, str(output_dir / "experiments.db"))
     return rows

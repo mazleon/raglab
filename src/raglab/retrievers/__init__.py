@@ -1,3 +1,9 @@
 """Retrievers."""
 
-from raglab.retrievers import bm25, dense, hybrid, multi_query  # noqa: F401
+from raglab.retrievers import (  # noqa: F401
+    bm25,
+    compressed,
+    dense,
+    hybrid,
+    multi_query,
+)

@@ -18,7 +18,7 @@ from raglab.core import registry
 from raglab.core.interfaces import LLM, Embedder, Reranker, Retriever, VectorStore
 
 # Embeddings can only come from these; OpenRouter (chat-only) is rejected here.
-_EMBEDDING_NAMES = {"hashing", "openai", "cohere", "bge_local", "e5_local"}
+_EMBEDDING_NAMES = {"hashing", "openai", "cohere", "gemini", "bge_local", "e5_local"}
 
 
 class EmbeddingCfg(BaseModel):
@@ -51,6 +51,7 @@ class RetrievalCfg(BaseModel):
     rrf_k: int = 60
     mmr_lambda: float = 0.5
     n_queries: int = 3  # for multi_query
+    options: dict[str, Any] = Field(default_factory=dict)  # e.g. {mode: binary|int8}
 
 
 class RerankerCfg(BaseModel):
@@ -70,6 +71,12 @@ class AgentCfg(BaseModel):
     max_retrieval_retries: int = 2
     grade_threshold: float = 0.6
     enable_critic: bool = True
+
+
+class GraphCfg(BaseModel):
+    backend: str = "networkx"  # networkx | neo4j
+    hops: int = 2
+    extractor: str = "heuristic"  # heuristic | llm
 
 
 class ObservabilityCfg(BaseModel):
@@ -99,6 +106,7 @@ class ExperimentConfig(BaseModel):
     reranker: RerankerCfg = Field(default_factory=RerankerCfg)
     llm: LLMCfg = Field(default_factory=LLMCfg)
     agent: AgentCfg = Field(default_factory=AgentCfg)
+    graph: GraphCfg = Field(default_factory=GraphCfg)
     observability: ObservabilityCfg = Field(default_factory=ObservabilityCfg)
     evaluation: EvaluationCfg = Field(default_factory=EvaluationCfg)
 
@@ -173,6 +181,14 @@ def build_retriever(
         return registry.create("retriever", "dense", embedder=embedder, store=store)
     if cfg.type == "bm25":
         return registry.create("retriever", "bm25", store=store)
+    if cfg.type == "compressed":
+        return registry.create(
+            "retriever",
+            "compressed",
+            embedder=embedder,
+            store=store,
+            mode=cfg.options.get("mode", "binary"),
+        )
     if cfg.type == "hybrid":
         dense = registry.create("retriever", "dense", embedder=embedder, store=store)
         bm25 = registry.create("retriever", "bm25", store=store)

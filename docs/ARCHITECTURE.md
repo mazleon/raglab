@@ -35,13 +35,14 @@ flowchart LR
 | Kind          | Protocol      | M1 implementations |
 |---------------|---------------|--------------------|
 | parser        | `Parser`      | text, html, csv, pdf, docx |
-| chunker       | `Chunker`     | recursive, fixed, parent_child |
-| embedder      | `Embedder`    | hashing (offline), openai, cohere, bge_local, e5_local |
-| vectorstore   | `VectorStore` | qdrant (in-memory or server) |
-| retriever     | `Retriever`   | dense, bm25, hybrid (RRF/MMR), multi_query |
+| chunker       | `Chunker`     | recursive, fixed, parent_child, semantic, agentic |
+| embedder      | `Embedder`    | hashing (offline), openai, cohere, gemini, bge_local, e5_local |
+| vectorstore   | `VectorStore` | qdrant (in-memory, on-disk, or server) |
+| retriever     | `Retriever`   | dense, bm25, hybrid (RRF/MMR), multi_query, compressed (binary/int8) |
 | reranker      | `Reranker`    | noop, cross_encoder, cohere |
-| llm           | `LLM`         | echo (offline), openai, openrouter |
-| architecture  | `Pipeline`    | naive_rag, hybrid_rag, agentic_rag + 10 stubs |
+| llm           | `LLM`         | echo (offline), openai, openrouter, gemini |
+| architecture  | `Pipeline`    | naive, hybrid, agentic, advanced, crag, self_rag, adaptive, multi_hop, reflective, deep_search, hierarchical, graph_rag, kg_vector_rag (13) |
+| graphstore    | `GraphStore`  | networkx (in-core), neo4j (optional) |
 | evaluator     | `Evaluator`   | builtin proxies, ragas, llm judges |
 | tracer        | `Tracer`      | noop, langfuse, langsmith (env) |
 

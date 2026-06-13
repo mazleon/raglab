@@ -74,7 +74,7 @@ def evaluate_builtin(records: list[dict], metric_names: list[str]) -> dict[str, 
 
     out: dict[str, float] = {}
     if not records:
-        return {m: 0.0 for m in metric_names}
+        return dict.fromkeys(metric_names, 0.0)
     for name in metric_names:
         fn = METRICS.get(name)
         if fn is None:

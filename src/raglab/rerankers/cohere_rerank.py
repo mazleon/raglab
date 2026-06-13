@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import ScoredChunk
@@ -11,8 +12,8 @@ from raglab.core.types import ScoredChunk
 @register("reranker", "cohere")
 class CohereReranker:
     def __init__(self, model: str | None = None, **_: object) -> None:
-        self._model = model or "rerank-english-v3.0"
-        self._client = None
+        self._model = model or "rerank-v4.0-fast"
+        self._client: Any = None
 
     def _ensure(self):
         if self._client is None:

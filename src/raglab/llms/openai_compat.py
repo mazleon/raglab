@@ -8,6 +8,7 @@ response drives cost via the price table.
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import LLMResponse
@@ -29,7 +30,7 @@ class _OpenAICompatLLM:
         self._model = model or self._default_model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self._client = None
+        self._client: Any = None
 
     def _ensure(self):
         if self._client is None:
@@ -80,6 +81,6 @@ class OpenAILLM(_OpenAICompatLLM):
 
 @register("llm", "openrouter")
 class OpenRouterLLM(_OpenAICompatLLM):
-    _default_model = "anthropic/claude-3.5-sonnet"
+    _default_model = "google/gemma-4-31b:free"
     _base_url = "https://openrouter.ai/api/v1"
     _api_key_env = "OPENROUTER_API_KEY"

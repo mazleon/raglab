@@ -14,12 +14,17 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from raglab.core import registry
 from raglab.core.config import load_config
+from raglab.env import ensure_loaded
+from raglab.evaluation.reports import write_html
+from raglab.experiments.store import DEFAULT_DB, list_experiments
 from raglab.service import build_engine
 
+ensure_loaded()
 app = FastAPI(title="RAGLab", version="0.1.0")
 
 
@@ -87,3 +92,22 @@ def benchmark(req: BenchmarkRequest) -> dict[str, Any]:
 
     rows = run_benchmark(req.config)
     return {"experiments": rows, "count": len(rows)}
+
+
+@app.get("/experiments")
+def experiments() -> dict[str, Any]:
+    rows = list_experiments(DEFAULT_DB)
+    return {"experiments": rows, "count": len(rows)}
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard() -> str:
+    import tempfile
+    from pathlib import Path
+
+    rows = list_experiments(DEFAULT_DB)
+    if not rows:
+        return "<h1>RAGLab</h1><p>No experiments yet. Run <code>raglab bench</code>.</p>"
+    tmp = Path(tempfile.gettempdir()) / "raglab_dashboard.html"
+    write_html(rows, tmp, title="RAGLab Experiment Dashboard")
+    return tmp.read_text()

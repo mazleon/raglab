@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from raglab.core.types import Chunk
 
 
 def enrich(chunks: list[Chunk]) -> list[Chunk]:
-    ts = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(UTC).isoformat()
     for i, chunk in enumerate(chunks):
         chunk.metadata.setdefault("timestamp", ts)
         chunk.metadata.setdefault("chunk_id", chunk.chunk_id)

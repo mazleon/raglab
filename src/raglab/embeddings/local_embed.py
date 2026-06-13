@@ -27,9 +27,10 @@ class _SentenceTransformerEmbedder:
                 raise ImportError(
                     "Local embeddings need the 'local' extra: pip install 'raglab[local]'"
                 ) from e
-            self._model = SentenceTransformer(self._model_name)
+            model = SentenceTransformer(self._model_name)
+            self._model = model
             if self._dim is None:
-                self._dim = int(self._model.get_sentence_embedding_dimension())
+                self._dim = int(model.get_sentence_embedding_dimension())
         return self._model
 
     @property

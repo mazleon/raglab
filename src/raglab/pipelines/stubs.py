@@ -12,18 +12,10 @@ from raglab.core.types import RAGResult
 from raglab.pipelines.base import BasePipeline
 
 # name -> (roadmap phase, one-line description)
-_PLANNED: dict[str, tuple[str, str]] = {
-    "advanced_rag": ("Phase 3", "query transforms + parent-child expansion + rerank"),
-    "crag": ("Phase 3", "Corrective RAG: web/secondary retrieval on low grade"),
-    "self_rag": ("Phase 3", "Self-RAG: reflection tokens gate retrieval & critique"),
-    "adaptive_rag": ("Phase 3", "router picks strategy by query complexity"),
-    "multi_hop_rag": ("Phase 3", "iterative decompose-retrieve-synthesize"),
-    "reflective_rag": ("Phase 3", "generate-reflect-revise loop"),
-    "deep_search_rag": ("Phase 3", "agentic deep search over many sources"),
-    "hierarchical_rag": ("Phase 3", "summary-tree / hierarchical retrieval"),
-    "graph_rag": ("Phase 2", "Neo4j entity/relationship graph retrieval"),
-    "kg_vector_rag": ("Phase 2", "knowledge-graph + vector hybrid"),
-}
+# Phase 2 + Phase 3 architectures are now implemented in their own modules; this
+# map is intentionally empty but kept so future planned architectures register
+# the same way.
+_PLANNED: dict[str, tuple[str, str]] = {}
 
 
 def _make_stub(arch_name: str, phase: str, desc: str) -> type:

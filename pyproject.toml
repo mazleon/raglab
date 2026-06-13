@@ -23,6 +23,7 @@ dependencies = [
   "numpy>=1.26",
   "qdrant-client>=1.9",
   "rank-bm25>=0.2.2",
+  "networkx>=3.2",
   "langchain-core>=0.2",
   "langgraph>=0.1",
 ]
@@ -31,11 +32,12 @@ dependencies = [
 # Cloud providers (OpenAI / Cohere / OpenRouter). OpenRouter is chat-only and
 # reuses the OpenAI-compatible client.
 providers = [
-  "langchain-openai>=0.1",
-  "langchain-cohere>=0.1",
   "openai>=1.30",
   "cohere>=5.5",
+  "google-genai>=0.3",
 ]
+# Optional Neo4j backend for GraphRAG (networkx is the in-core default).
+neo4j = ["neo4j>=5.20"]
 # Local embeddings + cross-encoder reranker (pulls torch — large).
 local = ["sentence-transformers>=3.0"]
 # RAGAS automated evaluation (needs a judge LLM + embeddings).

@@ -40,14 +40,18 @@ class QdrantStore:
         self.collection = collection
         self._distance = distance
         url = url or os.environ.get("QDRANT_URL")
+        location = location or ":memory:"
         if url:
             self._client = QdrantClient(
                 url=url, api_key=os.environ.get("QDRANT_API_KEY")
             )
+        elif location == ":memory:":
+            self._client = QdrantClient(location=":memory:")
         else:
-            # Default to a persistent local server is undesirable for tests, so
-            # fall back to in-memory unless a location/url is explicitly given.
-            self._client = QdrantClient(location=location or ":memory:")
+            # A filesystem path => embedded on-disk Qdrant. This persists across
+            # processes (e.g. `raglab ingest` then `raglab query`) without a
+            # server, while a URL/QDRANT_URL targets a running Qdrant instance.
+            self._client = QdrantClient(path=location)
 
     def ensure_collection(self, dim: int) -> None:
         from qdrant_client.models import Distance, VectorParams
@@ -91,7 +95,7 @@ class QdrantStore:
             return None
         from qdrant_client.models import FieldCondition, Filter, MatchValue
 
-        conditions = [
+        conditions: list[Any] = [
             FieldCondition(key=k, match=MatchValue(value=v)) for k, v in where.items()
         ]
         return Filter(must=conditions)
@@ -99,14 +103,17 @@ class QdrantStore:
     def search(
         self, vector: Vector, k: int, where: dict[str, Any] | None = None
     ) -> list[ScoredChunk]:
-        hits = self._client.search(
+        response = self._client.query_points(
             collection_name=self.collection,
-            query_vector=list(vector),
+            query=list(vector),
             limit=k,
             query_filter=self._filter(where),
             with_payload=True,
         )
-        return [ScoredChunk(self._to_chunk(h.payload or {}), float(h.score)) for h in hits]
+        return [
+            ScoredChunk(self._to_chunk(h.payload or {}), float(h.score))
+            for h in response.points
+        ]
 
     def all_chunks(self) -> list[Chunk]:
         out: list[Chunk] = []
