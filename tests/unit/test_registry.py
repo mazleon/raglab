@@ -17,9 +17,11 @@ def test_all_architectures_registered():
 
 
 def test_unknown_component_raises_with_options():
+    from raglab.errors import ConfigError
+
     try:
         registry.get("embedder", "does-not-exist")
-    except KeyError as e:
+    except ConfigError as e:
         assert "Available" in str(e)
     else:  # pragma: no cover
-        raise AssertionError("expected KeyError")
+        raise AssertionError("expected ConfigError")

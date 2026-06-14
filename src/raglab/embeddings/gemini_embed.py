@@ -12,6 +12,7 @@ from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import Vector
+from raglab.errors import MissingDependencyError, ProviderAuthError
 
 
 @register("embedder", "gemini")
@@ -25,11 +26,16 @@ class GeminiEmbedder:
         if self._client is None:
             try:
                 from google import genai
-            except ImportError as e:  # pragma: no cover
-                raise ImportError(
+            except ImportError as e:
+                raise MissingDependencyError(
                     "Gemini embeddings need the 'providers' extra: pip install 'raglab[providers]'"
                 ) from e
-            self._client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
+            api_key = os.environ.get("GOOGLE_API_KEY")
+            if not api_key:
+                raise ProviderAuthError(
+                    "gemini: environment variable GOOGLE_API_KEY is not set."
+                )
+            self._client = genai.Client(api_key=api_key)
         return self._client
 
     @property

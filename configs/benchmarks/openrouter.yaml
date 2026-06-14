@@ -1,0 +1,31 @@
+# LLM-as-judge benchmark — OpenRouter judge (requires OPENROUTER_API_KEY).
+# deepseek/deepseek-chat is cheap and reliable. Any OpenRouter model id works;
+# note that ":free" slugs are heavily rate-limited and often require the paid slug.
+collection: raglab_bench_openrouter
+corpus: examples/docs
+dataset: examples/qa/qa.jsonl
+output_dir: reports
+
+base:
+  vectorstore: { name: qdrant, location: ":memory:", distance: cosine }
+  llm: { provider: echo }
+  observability: { langfuse: false, langsmith: false }
+
+matrix:
+  architecture: [naive_rag, hybrid_rag]
+  embedding:
+    - { name: hashing, dim: 384 }
+  retrieval:
+    - { type: dense, k: 5 }
+    - { type: hybrid, dense_k: 20, bm25_k: 20, fusion: rrf, rrf_k: 60, k: 5 }
+  reranker:
+    - { name: noop }
+
+evaluation:
+  builtin_metrics: [context_recall_proxy, answer_relevancy_proxy, answer_nonempty]
+  judges: [faithfulness, answer_quality]
+  judge_llm:
+    provider: openrouter
+    model: deepseek/deepseek-chat
+    temperature: 0.0
+    max_tokens: 256

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import Vector
+from raglab.errors import MissingDependencyError, ProviderAuthError
 
 _DIMS = {
     "text-embedding-3-large": 3072,
@@ -25,10 +27,14 @@ class OpenAIEmbedder:
         if self._client is None:
             try:
                 from openai import OpenAI
-            except ImportError as e:  # pragma: no cover
-                raise ImportError(
+            except ImportError as e:
+                raise MissingDependencyError(
                     "OpenAI embeddings need the 'providers' extra: pip install 'raglab[providers]'"
                 ) from e
+            if not os.environ.get("OPENAI_API_KEY"):
+                raise ProviderAuthError(
+                    "openai: environment variable OPENAI_API_KEY is not set."
+                )
             self._client = OpenAI()
         return self._client
 

@@ -1,0 +1,32 @@
+# LLM-as-judge benchmark — Gemini judge (requires GOOGLE_API_KEY + [providers]).
+# `judge_delay_s` spaces out calls to respect the Gemini free-tier rate limit
+# (~5 req/min); raise it if you still hit 429s, or remove it on a paid tier.
+collection: raglab_bench_gemini
+corpus: examples/docs
+dataset: examples/qa/qa.jsonl
+output_dir: reports
+
+base:
+  vectorstore: { name: qdrant, location: ":memory:", distance: cosine }
+  llm: { provider: echo }
+  observability: { langfuse: false, langsmith: false }
+
+matrix:
+  architecture: [naive_rag]      # single arch to stay within free-tier limits
+  embedding:
+    - { name: hashing, dim: 384 }
+  retrieval:
+    - { type: dense, k: 5 }
+    - { type: hybrid, dense_k: 20, bm25_k: 20, fusion: rrf, rrf_k: 60, k: 5 }
+  reranker:
+    - { name: noop }
+
+evaluation:
+  builtin_metrics: [context_recall_proxy, answer_relevancy_proxy, answer_nonempty]
+  judges: [faithfulness]
+  judge_delay_s: 13              # ~5 req/min
+  judge_llm:
+    provider: gemini
+    model: gemini-2.5-flash
+    temperature: 0.0
+    max_tokens: 256

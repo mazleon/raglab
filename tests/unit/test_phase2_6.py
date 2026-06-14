@@ -42,7 +42,7 @@ def test_semantic_and_agentic_chunkers():
 
 
 def test_compressed_retriever_modes():
-    cfg = load_config("configs/naive.yaml")
+    cfg = load_config("configs/pipelines/naive.yaml")
     emb = build_embedder(cfg.embedding)
     store = build_vectorstore(cfg.vectorstore, "comp_unit", emb.dim)
     IngestionPipeline(create("chunker", "recursive"), emb, store).ingest("examples/docs")

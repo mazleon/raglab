@@ -19,3 +19,7 @@ reports/
 CLAUDE.md
 AGENTS.md
 docs/ROADMAP.md
+
+# Generated artifacts
+graphify-out/
+qdrant_storage/

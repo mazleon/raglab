@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 
 from raglab.core import registry
 from raglab.core.interfaces import LLM, Embedder, Reranker, Retriever, VectorStore
+from raglab.errors import ConfigError
 
 # Embeddings can only come from these; OpenRouter (chat-only) is rejected here.
 _EMBEDDING_NAMES = {"hashing", "openai", "cohere", "gemini", "bge_local", "e5_local"}
@@ -94,6 +95,7 @@ class EvaluationCfg(BaseModel):
             "answer_nonempty",
         ]
     )
+    judge_llm: LLMCfg | None = None
 
 
 class ExperimentConfig(BaseModel):
@@ -112,7 +114,7 @@ class ExperimentConfig(BaseModel):
 
     def model_post_init(self, _ctx: Any) -> None:
         if self.embedding.name not in _EMBEDDING_NAMES:
-            raise ValueError(
+            raise ConfigError(
                 f"embedding.name {self.embedding.name!r} is not a valid embedder. "
                 f"OpenRouter is chat-only; embeddings must be one of {sorted(_EMBEDDING_NAMES)}."
             )
@@ -213,7 +215,10 @@ def build_retriever(
         return registry.create(
             "retriever", "multi_query", base=base, n_queries=cfg.n_queries
         )
-    raise ValueError(f"Unknown retrieval.type {cfg.type!r}")
+    raise ConfigError(
+        f"Unknown retrieval.type {cfg.type!r}. "
+        "Valid: dense, bm25, hybrid, multi_query, compressed."
+    )
 
 
 def build_reranker(cfg: RerankerCfg) -> Reranker:

@@ -1,0 +1,42 @@
+# Full cloud stack — verified with real keys.
+#   Gemini embeddings + Cohere Rerank + OpenRouter (DeepSeek) + LangFuse/LangSmith.
+# Requires: pip install -e ".[providers,obs]" and a populated .env.
+collection: raglab_cloud
+architecture: agentic_rag
+
+embedding:
+  name: gemini            # gemini-embedding-001, 768-dim
+  dim: 768
+
+vectorstore:
+  name: qdrant
+  # No explicit location: uses QDRANT_URL if set, otherwise in-memory.
+  # Set `location: ":memory:"` to force in-memory, or `location: qdrant_storage`
+  # for an on-disk store.
+  distance: cosine
+
+retrieval:
+  type: hybrid
+  dense_k: 10
+  bm25_k: 10
+  fusion: rrf
+  k: 6
+
+reranker:
+  name: cohere
+  model: rerank-v4.0-fast
+  top_n: 4
+
+llm:
+  provider: openrouter    # any OpenRouter model id (deepseek/deepseek-chat is cheap + reliable)
+  model: deepseek/deepseek-chat
+  max_tokens: 400
+
+agent:
+  max_retrieval_retries: 2
+  grade_threshold: 0.6
+  enable_critic: true
+
+observability:
+  langfuse: true
+  langsmith: true

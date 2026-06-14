@@ -7,6 +7,7 @@ from typing import Any
 
 from raglab.core.registry import register
 from raglab.core.types import Vector
+from raglab.errors import MissingDependencyError, ProviderAuthError
 
 _DIMS = {"embed-english-v3.0": 1024, "embed-multilingual-v3.0": 1024}
 
@@ -22,11 +23,16 @@ class CohereEmbedder:
         if self._client is None:
             try:
                 import cohere
-            except ImportError as e:  # pragma: no cover
-                raise ImportError(
+            except ImportError as e:
+                raise MissingDependencyError(
                     "Cohere embeddings need the 'providers' extra: pip install 'raglab[providers]'"
                 ) from e
-            self._client = cohere.Client(os.environ.get("COHERE_API_KEY"))
+            api_key = os.environ.get("COHERE_API_KEY")
+            if not api_key:
+                raise ProviderAuthError(
+                    "cohere: environment variable COHERE_API_KEY is not set."
+                )
+            self._client = cohere.Client(api_key)
         return self._client
 
     @property

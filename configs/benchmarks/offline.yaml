@@ -1,0 +1,34 @@
+# Offline benchmark matrix (no API keys). The runner takes the cartesian product
+# of every `matrix` list, runs each cell over the QA dataset, and writes a ranked
+# CSV + HTML leaderboard plus a row in the SQLite experiment store.
+collection: raglab_bench
+corpus: examples/docs
+dataset: examples/qa/qa.jsonl
+output_dir: reports
+
+# Shared base applied to every cell (overridable by matrix entries).
+base:
+  vectorstore:
+    name: qdrant
+    location: ":memory:"
+    distance: cosine
+  llm:
+    provider: echo
+    temperature: 0.0
+  observability:
+    langfuse: false
+
+matrix:
+  architecture: [naive_rag, hybrid_rag]
+  embedding:
+    - { name: hashing, dim: 384 }
+  retrieval:
+    - { type: dense, k: 5 }
+    - { type: hybrid, dense_k: 20, bm25_k: 20, fusion: rrf, rrf_k: 60, k: 5 }
+  reranker:
+    - { name: noop }
+
+evaluation:
+  ragas: false
+  judges: []
+  builtin_metrics: [context_recall_proxy, answer_relevancy_proxy, answer_nonempty]

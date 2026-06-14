@@ -1,12 +1,16 @@
 """RAGLab command-line interface (Typer).
 
     raglab ingest <path> --config configs/ingest.yaml
-    raglab query "..."   --config configs/agentic.yaml [--ingest examples/docs]
-    raglab bench         --config configs/benchmark.yaml
+    raglab query "..."   --config configs/pipelines/agentic.yaml [--ingest examples/docs]
+    raglab bench         --config configs/benchmarks/offline.yaml
     raglab architectures
 """
 
 from __future__ import annotations
+
+import functools
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import typer
 from rich.console import Console
@@ -14,14 +18,35 @@ from rich.table import Table
 
 from raglab.core import registry
 from raglab.core.config import load_config
+from raglab.errors import RaglabError
 from raglab.ingestion.pipeline import IngestionPipeline
 from raglab.service import build_engine
 
 app = typer.Typer(add_completion=False, help="RAGLab — modular RAG benchmarking.")
 console = Console()
 
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def handle_errors(fn: F) -> F:
+    """Turn any RaglabError into a clean message + non-zero exit, not a traceback."""
+
+    @functools.wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return fn(*args, **kwargs)
+        except RaglabError as e:
+            console.print(f"[bold red]Error:[/] {e}")
+            raise typer.Exit(1) from None
+        except FileNotFoundError as e:
+            console.print(f"[bold red]Error:[/] file not found: {e}")
+            raise typer.Exit(1) from None
+
+    return wrapper  # type: ignore[return-value]
+
 
 @app.command()
+@handle_errors
 def ingest(
     path: str = typer.Argument(..., help="File or directory to ingest."),
     config: str = typer.Option("configs/ingest.yaml", "--config", "-c"),
@@ -38,9 +63,10 @@ def ingest(
 
 
 @app.command()
+@handle_errors
 def query(
     text: str = typer.Argument(..., help="The question to answer."),
-    config: str = typer.Option("configs/naive.yaml", "--config", "-c"),
+    config: str = typer.Option("configs/pipelines/naive.yaml", "--config", "-c"),
     ingest_path: str = typer.Option(
         None, "--ingest", help="Ingest this path into the store before querying "
         "(needed for in-memory Qdrant)."
@@ -80,8 +106,9 @@ def query(
 
 
 @app.command()
+@handle_errors
 def bench(
-    config: str = typer.Option("configs/benchmark.yaml", "--config", "-c"),
+    config: str = typer.Option("configs/benchmarks/offline.yaml", "--config", "-c"),
 ) -> None:
     """Run the benchmark matrix and write a CSV + HTML leaderboard."""
 

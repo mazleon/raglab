@@ -1,0 +1,28 @@
+# Naive RAG — retrieve -> generate. Offline by default (no keys needed).
+collection: raglab_demo
+architecture: naive_rag
+
+embedding:
+  name: hashing          # offline; alternatives: openai | cohere | gemini | bge_local
+  dim: 384
+
+vectorstore:
+  name: qdrant
+  location: ":memory:"   # set QDRANT_URL (or url:) for a persistent server
+  distance: cosine
+
+retrieval:
+  type: dense
+  k: 5
+
+reranker:
+  name: noop
+
+llm:
+  provider: echo         # offline extractive answerer; swap to openai | openrouter | gemini
+  temperature: 0.0
+  max_tokens: 512
+
+observability:
+  langfuse: false
+  langsmith: false

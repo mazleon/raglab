@@ -1,0 +1,31 @@
+# LLM-as-judge benchmark — OpenAI judge (requires OPENAI_API_KEY + [providers]).
+# The pipeline answers with the offline echo LLM; gpt-4o-mini judges the
+# faithfulness and answer quality of each answer over its retrieved context.
+collection: raglab_bench_openai
+corpus: examples/docs
+dataset: examples/qa/qa.jsonl
+output_dir: reports
+
+base:
+  vectorstore: { name: qdrant, location: ":memory:", distance: cosine }
+  llm: { provider: echo }
+  observability: { langfuse: false, langsmith: false }
+
+matrix:
+  architecture: [naive_rag, hybrid_rag]
+  embedding:
+    - { name: hashing, dim: 384 }
+  retrieval:
+    - { type: dense, k: 5 }
+    - { type: hybrid, dense_k: 20, bm25_k: 20, fusion: rrf, rrf_k: 60, k: 5 }
+  reranker:
+    - { name: noop }
+
+evaluation:
+  builtin_metrics: [context_recall_proxy, answer_relevancy_proxy, answer_nonempty]
+  judges: [faithfulness, answer_quality]
+  judge_llm:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.0
+    max_tokens: 256

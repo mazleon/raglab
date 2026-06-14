@@ -10,7 +10,13 @@ from raglab.core.config import (
 
 @pytest.mark.parametrize(
     "path",
-    ["configs/naive.yaml", "configs/hybrid.yaml", "configs/agentic.yaml", "configs/ingest.yaml"],
+    [
+        "configs/pipelines/naive.yaml",
+        "configs/pipelines/hybrid.yaml",
+        "configs/pipelines/agentic.yaml",
+        "configs/pipelines/cloud.yaml",
+        "configs/ingest.yaml",
+    ],
 )
 def test_configs_load(path):
     cfg = load_config(path)
@@ -18,12 +24,14 @@ def test_configs_load(path):
 
 
 def test_openrouter_embedding_rejected():
-    with pytest.raises(ValueError):
+    from raglab.errors import ConfigError
+
+    with pytest.raises(ConfigError):
         config_from_dict({"embedding": {"name": "openrouter"}})
 
 
 def test_build_components_offline_defaults():
-    cfg = load_config("configs/hybrid.yaml")
+    cfg = load_config("configs/pipelines/hybrid.yaml")
     comps = build_components(cfg)
     assert comps.embedder.dim == 384
     # hybrid retriever wires dense + bm25

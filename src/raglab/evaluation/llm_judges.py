@@ -8,6 +8,7 @@ you can compare judges by swapping the model in config.
 from __future__ import annotations
 
 import re
+import time
 from typing import Any
 
 from raglab.core.interfaces import LLM
@@ -62,8 +63,13 @@ class LLMJudge:
         match = _FLOAT.search(resp.text)
         return float(match.group()) if match else 0.0
 
-    def evaluate(self, records: list[dict[str, Any]]) -> dict[str, float]:
+    def evaluate(self, records: list[dict[str, Any]], delay_s: float = 0.0) -> dict[str, float]:
         if not records:
             return {f"judge_{self.dimension}": 0.0}
-        mean = sum(self._score_one(r) for r in records) / len(records)
+        scores: list[float] = []
+        for r in records:
+            scores.append(self._score_one(r))
+            if delay_s > 0:
+                time.sleep(delay_s)
+        mean = sum(scores) / len(scores)
         return {f"judge_{self.dimension}": round(mean, 4)}

@@ -39,19 +39,31 @@ class QdrantStore:
 
         self.collection = collection
         self._distance = distance
-        url = url or os.environ.get("QDRANT_URL")
-        location = location or ":memory:"
+        # Precedence (most explicit wins):
+        #   1. config `url:`                 -> that server
+        #   2. config `location:` (incl. ":memory:" or a path) -> in-memory / on-disk
+        #   3. env QDRANT_URL                -> that server
+        #   4. nothing                       -> in-memory
+        # An explicit `location` beats the ambient QDRANT_URL so a config that
+        # asks for ":memory:" is never silently redirected to a server.
         if url:
             self._client = QdrantClient(
-                url=url, api_key=os.environ.get("QDRANT_API_KEY")
+                url=url, api_key=os.environ.get("QDRANT_API_KEY"), timeout=60
             )
         elif location == ":memory:":
-            self._client = QdrantClient(location=":memory:")
+            self._client = QdrantClient(location=":memory:", timeout=60)
+        elif location:
+            # A filesystem path => embedded on-disk Qdrant, persisting across
+            # processes (e.g. `raglab ingest` then `raglab query`) without a server.
+            self._client = QdrantClient(path=location, timeout=60)
+        elif os.environ.get("QDRANT_URL"):
+            self._client = QdrantClient(
+                url=os.environ["QDRANT_URL"],
+                api_key=os.environ.get("QDRANT_API_KEY"),
+                timeout=60,
+            )
         else:
-            # A filesystem path => embedded on-disk Qdrant. This persists across
-            # processes (e.g. `raglab ingest` then `raglab query`) without a
-            # server, while a URL/QDRANT_URL targets a running Qdrant instance.
-            self._client = QdrantClient(path=location)
+            self._client = QdrantClient(location=":memory:", timeout=60)
 
     def ensure_collection(self, dim: int) -> None:
         from qdrant_client.models import Distance, VectorParams

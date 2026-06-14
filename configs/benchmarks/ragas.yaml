@@ -1,0 +1,26 @@
+# RAGAS benchmark (requires the [eval] extra + OPENAI_API_KEY).
+# RAGAS computes faithfulness / answer_relevancy / context_precision /
+# context_recall using its own judge model (configured via OpenAI env by default).
+collection: raglab_bench_ragas
+corpus: examples/docs
+dataset: examples/qa/qa.jsonl
+output_dir: reports
+
+base:
+  vectorstore: { name: qdrant, location: ":memory:", distance: cosine }
+  llm: { provider: echo }
+  observability: { langfuse: false }
+
+matrix:
+  architecture: [naive_rag, hybrid_rag]
+  embedding:
+    - { name: hashing, dim: 384 }
+  retrieval:
+    - { type: dense, k: 5 }
+    - { type: hybrid, dense_k: 20, bm25_k: 20, fusion: rrf, rrf_k: 60, k: 5 }
+  reranker:
+    - { name: noop }
+
+evaluation:
+  ragas: true
+  builtin_metrics: [context_recall_proxy, answer_relevancy_proxy, answer_nonempty]

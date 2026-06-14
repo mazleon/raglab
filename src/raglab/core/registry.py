@@ -76,8 +76,10 @@ def get(kind: str, name: str) -> type:
     try:
         return _REGISTRY[kind][name]
     except KeyError:
+        from raglab.errors import ConfigError
+
         opts = ", ".join(available(kind)) or "<none>"
-        raise KeyError(
+        raise ConfigError(
             f"No {kind!r} registered as {name!r}. Available: {opts}"
         ) from None
 

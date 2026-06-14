@@ -13,13 +13,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 from raglab.core import registry
 from raglab.core.config import load_config
 from raglab.env import ensure_loaded
+from raglab.errors import ConfigError, ProviderError, RaglabError
 from raglab.evaluation.reports import write_html
 from raglab.experiments.store import DEFAULT_DB, list_experiments
 from raglab.service import build_engine
@@ -28,9 +29,20 @@ ensure_loaded()
 app = FastAPI(title="RAGLab", version="0.1.0")
 
 
+@app.exception_handler(RaglabError)
+def _raglab_error_handler(_request: Request, exc: RaglabError) -> JSONResponse:
+    # Config mistakes are the caller's fault (400); upstream provider failures
+    # are a bad gateway (502).
+    status = 400 if isinstance(exc, ConfigError) else 502 if isinstance(exc, ProviderError) else 500
+    return JSONResponse(
+        status_code=status,
+        content={"error": type(exc).__name__, "detail": str(exc)},
+    )
+
+
 class QueryRequest(BaseModel):
     query: str
-    config: str = "configs/naive.yaml"
+    config: str = "configs/pipelines/naive.yaml"
     ingest_path: str | None = None
 
 
@@ -43,7 +55,7 @@ class QueryResponse(BaseModel):
 
 
 class BenchmarkRequest(BaseModel):
-    config: str = "configs/benchmark.yaml"
+    config: str = "configs/benchmarks/offline.yaml"
 
 
 @app.get("/health")
