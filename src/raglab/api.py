@@ -123,3 +123,128 @@ def dashboard() -> str:
     tmp = Path(tempfile.gettempdir()) / "raglab_dashboard.html"
     write_html(rows, tmp, title="RAGLab Experiment Dashboard")
     return tmp.read_text()
+
+
+# --------------------------------------------------------------------------- #
+# Memory Engineering Platform
+# --------------------------------------------------------------------------- #
+_memory: Any = None
+
+
+def get_memory() -> Any:
+    """Process-lifetime MemoryManager. SQLite path + Qdrant location come from
+    env (RAGLAB_MEMORY_DB / RAGLAB_MEMORY_QDRANT), defaulting to in-memory."""
+
+    global _memory
+    if _memory is None:
+        import os
+
+        from raglab.memory import MemoryManager
+
+        _memory = MemoryManager(
+            db_path=os.environ.get("RAGLAB_MEMORY_DB", ":memory:"),
+            qdrant_location=os.environ.get("RAGLAB_MEMORY_QDRANT", ":memory:"),
+        )
+    return _memory
+
+
+class ScopeModel(BaseModel):
+    tenant_id: str = "default"
+    user_id: str = "default"
+    agent_id: str = ""
+    session_id: str = ""
+
+    def to_scope(self) -> Any:
+        from raglab.memory import MemoryScope
+
+        return MemoryScope(**self.model_dump())
+
+
+class RememberRequest(BaseModel):
+    type: str
+    content: str
+    scope: ScopeModel = ScopeModel()
+    importance: float | None = None
+    structured: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
+    ttl_seconds: int | None = None
+    force: bool = False
+
+
+class RecallRequest(BaseModel):
+    query: str
+    scope: ScopeModel = ScopeModel()
+    types: list[str] | None = None
+    k: int = 5
+    min_importance: float = 0.0
+
+
+@app.post("/memory/remember")
+def memory_remember(req: RememberRequest) -> dict[str, Any]:
+    mem = get_memory()
+    mid = mem.remember(
+        req.type, req.content, req.scope.to_scope(),
+        importance=req.importance, structured=req.structured,
+        metadata=req.metadata, ttl_seconds=req.ttl_seconds, force=req.force,
+    )
+    return {"id": mid, "stored": mid is not None}
+
+
+@app.post("/memory/recall")
+def memory_recall(req: RecallRequest) -> dict[str, Any]:
+    from raglab.memory import MemoryQuery
+
+    mem = get_memory()
+    q = MemoryQuery(
+        text=req.query, scope=req.scope.to_scope(), k=req.k,
+        min_importance=req.min_importance, types=req.types or [],
+    )
+    hits = mem.recall(q, types=req.types)
+    return {
+        "hits": [
+            {
+                "id": h.record.id, "type": h.record.type, "content": h.content,
+                "relevance": round(h.relevance, 4), "score": h.score,
+                "importance": h.record.importance,
+            }
+            for h in hits
+        ],
+        "count": len(hits),
+    }
+
+
+@app.get("/memory/timeline")
+def memory_timeline(
+    tenant_id: str = "default", user_id: str = "default", limit: int = 100
+) -> dict[str, Any]:
+    from raglab.memory import MemoryScope
+
+    mem = get_memory()
+    records = mem.timeline(MemoryScope(tenant_id=tenant_id, user_id=user_id), limit=limit)
+    return {
+        "timeline": [
+            {"id": r.id, "type": r.type, "content": r.content[:160],
+             "importance": r.importance, "created_at": r.created_at}
+            for r in records
+        ],
+        "count": len(records),
+    }
+
+
+@app.get("/memory/stats")
+def memory_stats(tenant_id: str = "default", user_id: str = "default") -> dict[str, Any]:
+    from raglab.memory import MemoryScope
+
+    return get_memory().stats(MemoryScope(tenant_id=tenant_id, user_id=user_id))
+
+
+@app.delete("/memory/{memory_id}")
+def memory_forget(memory_id: str) -> dict[str, Any]:
+    return {"deleted": get_memory().forget(memory_id)}
+
+
+@app.post("/memory/erase")
+def memory_erase(scope: ScopeModel) -> dict[str, Any]:
+    """GDPR erase: delete every memory matching the scope."""
+
+    return {"erased": get_memory().erase(scope.to_scope())}

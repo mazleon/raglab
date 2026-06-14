@@ -18,6 +18,30 @@ from raglab.core.types import Chunk, ScoredChunk, Vector
 _DISTANCE = {"cosine": "Cosine", "dot": "Dot", "euclid": "Euclid"}
 
 
+def build_qdrant_client(
+    url: str | None = None, location: str | None = None, timeout: int = 60
+) -> Any:
+    """Create a QdrantClient with RAGLab's connection precedence (most explicit
+    wins): config ``url`` > config ``location`` (``:memory:`` or a path) > env
+    ``QDRANT_URL`` > in-memory. An explicit ``location`` beats the ambient
+    ``QDRANT_URL`` so ``:memory:`` is never silently redirected to a server.
+    Shared by the RAG vector store and the memory vector index.
+    """
+
+    from qdrant_client import QdrantClient
+
+    api_key = os.environ.get("QDRANT_API_KEY")
+    if url:
+        return QdrantClient(url=url, api_key=api_key, timeout=timeout)
+    if location == ":memory:":
+        return QdrantClient(location=":memory:", timeout=timeout)
+    if location:
+        return QdrantClient(path=location, timeout=timeout)
+    if os.environ.get("QDRANT_URL"):
+        return QdrantClient(url=os.environ["QDRANT_URL"], api_key=api_key, timeout=timeout)
+    return QdrantClient(location=":memory:", timeout=timeout)
+
+
 def _point_id(chunk_id: str) -> str:
     try:
         return str(uuid.UUID(hex=chunk_id))
@@ -35,35 +59,9 @@ class QdrantStore:
         distance: str = "cosine",
         **_: object,
     ) -> None:
-        from qdrant_client import QdrantClient
-
         self.collection = collection
         self._distance = distance
-        # Precedence (most explicit wins):
-        #   1. config `url:`                 -> that server
-        #   2. config `location:` (incl. ":memory:" or a path) -> in-memory / on-disk
-        #   3. env QDRANT_URL                -> that server
-        #   4. nothing                       -> in-memory
-        # An explicit `location` beats the ambient QDRANT_URL so a config that
-        # asks for ":memory:" is never silently redirected to a server.
-        if url:
-            self._client = QdrantClient(
-                url=url, api_key=os.environ.get("QDRANT_API_KEY"), timeout=60
-            )
-        elif location == ":memory:":
-            self._client = QdrantClient(location=":memory:", timeout=60)
-        elif location:
-            # A filesystem path => embedded on-disk Qdrant, persisting across
-            # processes (e.g. `raglab ingest` then `raglab query`) without a server.
-            self._client = QdrantClient(path=location, timeout=60)
-        elif os.environ.get("QDRANT_URL"):
-            self._client = QdrantClient(
-                url=os.environ["QDRANT_URL"],
-                api_key=os.environ.get("QDRANT_API_KEY"),
-                timeout=60,
-            )
-        else:
-            self._client = QdrantClient(location=":memory:", timeout=60)
+        self._client = build_qdrant_client(url, location)
 
     def ensure_collection(self, dim: int) -> None:
         from qdrant_client.models import Distance, VectorParams
