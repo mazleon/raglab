@@ -46,6 +46,16 @@ class AgenticRAG(BasePipeline):
     def __init__(self, components) -> None:  # type: ignore[no-untyped-def]
         super().__init__(components)
         self._app = self._build_graph()
+        # Opt-in episodic memory. Default off -> behaviour/tests unchanged.
+        self.memory: object | None = None
+        self.memory_scope: object | None = None
+
+    def attach_memory(self, manager: object, scope: object) -> None:
+        """Make the loop memory-aware: recall similar past episodes before
+        planning and record an episode after answering."""
+
+        self.memory = manager
+        self.memory_scope = scope
 
     # --- nodes ---
     def _plan(self, state: AgentState) -> AgentState:
@@ -162,9 +172,11 @@ class AgenticRAG(BasePipeline):
             "trajectory": [],
             "metrics": metrics,
         }
+        if self.memory is not None and self.memory_scope is not None:
+            self._recall_episodes(query, init["trajectory"])
         with timer(metrics):
             final = self._app.invoke(init)
-        return RAGResult(
+        result = RAGResult(
             query=query,
             answer=final["answer"],
             contexts=final["contexts"],
@@ -172,3 +184,28 @@ class AgenticRAG(BasePipeline):
             metrics=metrics,
             architecture=self.name,
         )
+        if self.memory is not None and self.memory_scope is not None:
+            self._record_episode(result, final.get("grade", 0.0))
+        return result
+
+    # --- optional episodic memory ---
+    def _recall_episodes(self, query: str, trajectory: list[TrajectoryStep]) -> None:
+        from raglab.memory import MemoryQuery
+
+        q = MemoryQuery(text=query, scope=self.memory_scope, k=3)  # type: ignore[arg-type]
+        hits = self.memory.recall(q, types=["episodic"])  # type: ignore[union-attr]
+        trajectory.insert(
+            0, TrajectoryStep("recall_memory", f"{len(hits)} similar past episodes")
+        )
+
+    def _record_episode(self, result: RAGResult, grade: float) -> None:
+        from raglab.memory import Episode
+
+        threshold = self.c.config.agent.grade_threshold
+        episode = Episode(
+            goal=result.query,
+            action=f"{self.name} (grade={grade:.2f})",
+            result=result.answer[:300],
+            success=grade >= threshold,
+        )
+        self.memory.store("episodic").record_episode(episode, self.memory_scope)  # type: ignore[union-attr]

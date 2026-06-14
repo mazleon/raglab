@@ -33,6 +33,7 @@ _IMPL_PACKAGES = (
     "raglab.evaluation",
     "raglab.observability",
     "raglab.graph",
+    "raglab.memory.stores",
 )
 
 _bootstrapped = False

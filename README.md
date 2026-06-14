@@ -110,6 +110,36 @@ skipped — the rest of the matrix still completes.
 raglab bench --config configs/benchmarks/openrouter.yaml   # LLM-judged, real keys
 ```
 
+## Memory Engineering Platform
+
+A first-class, pluggable memory subsystem alongside RAG (`src/raglab/memory/`).
+**Ten memory types** — working, episodic, semantic, procedural, long-term,
+reflection, agent, shared, workflow, graph — over **two storage tiers**: SQLite
+(structured source of truth + audit + governance) and Qdrant (semantic recall).
+`MemoryManager` is the single entrypoint:
+
+```python
+from raglab.memory import MemoryManager, MemoryScope, MemoryQuery, Episode
+
+mem = MemoryManager()                       # offline: SQLite :memory: + in-memory Qdrant
+scope = MemoryScope(tenant_id="acme", user_id="leon", session_id="s1")
+
+mem.remember("semantic", "RRF scores by 1/(k+rank).", scope)
+mem.store("episodic").record_episode(Episode("answer RRF", "hybrid", "ok", success=True), scope)
+hits = mem.recall(MemoryQuery(text="reciprocal rank fusion", scope=scope, k=3))
+
+mem.consolidate(scope)        # short-term -> long-term
+mem.maintain(scope)           # TTL expiry + decay + dedup + prune
+mem.erase(scope)              # GDPR delete-by-scope (audited)
+```
+
+- **Recall** is cross-type, fused and ranked by `relevance · importance · recency`.
+- **Formation** gates writes (drop trivial, summarize over-long); **lifecycle**
+  handles TTL/decay/prune/dedup; **consolidation** rolls working/episodic into
+  long-term. Multi-tenant isolation via `MemoryScope`; append-only audit log.
+- The **Agentic RAG** loop is opt-in memory-aware (`pipeline.attach_memory(mem, scope)`):
+  recalls similar past episodes before planning and records an episode after answering.
+
 ## API
 
 ```bash
@@ -124,6 +154,9 @@ uvicorn raglab.api:app --reload
 | POST | `/benchmark` | `{config}` |
 | GET | `/experiments` | Recorded benchmark experiments (SQLite) |
 | GET | `/dashboard` | HTML experiment dashboard |
+| POST | `/memory/remember` · `/memory/recall` | store / cross-type recall |
+| GET | `/memory/timeline` · `/memory/stats` | temporal view + counts |
+| DELETE | `/memory/{id}` · POST `/memory/erase` | forget one / GDPR erase by scope |
 
 Provider/config errors map to clean HTTP codes (400 for config, 502 for upstream
 provider failures) rather than stack traces.
@@ -157,3 +190,8 @@ CI (`.github/workflows/ci.yml`): ruff + mypy + unit on PR; integration on main.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system / sequence /
 data-flow diagrams and component contracts, and [docs/ROADMAP.md](docs/ROADMAP.md)
 for the (now-implemented) Phases 2–6 and remaining items.
+
+The path toward a full **AI Operating System** is planned in
+[docs/AIOS_AND_MEMORY_PLAN.md](docs/AIOS_AND_MEMORY_PLAN.md) (memory platform +
+overview) and [docs/FRONTEND_AIOS_PLAN.md](docs/FRONTEND_AIOS_PLAN.md) (the
+Agentic Intelligence Workspace frontend, with the 15 architecture deliverables).
