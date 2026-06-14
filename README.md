@@ -140,6 +140,195 @@ mem.erase(scope)              # GDPR delete-by-scope (audited)
 - The **Agentic RAG** loop is opt-in memory-aware (`pipeline.attach_memory(mem, scope)`):
   recalls similar past episodes before planning and records an episode after answering.
 
+## Agentic Intelligence Workspace (Frontend)
+
+The RAGLab platform now includes a comprehensive **Agentic Intelligence Workspace** frontend application that provides a user-facing interface for operating the AI workforce. This is a separate Next.js app (`web/`) with its own toolchain; it does not affect the Python backend's tests.
+
+### Overview
+
+The frontend implements the product requirements from `FRONTEND_AIOS_PLAN.md`:
+
+**Core jobs-to-be-done:**
+1. Ask questions and get **grounded, cited, interactively-rendered** answers.
+2. Watch and steer **multi-agent workflows** in real time.
+3. Run **deep research** that collects sources and produces reports.
+4. **Configure RAG pipelines** with no code and **compare** them (playground).
+5. Inspect **traces, retrieval, evaluation, cost** (observability).
+6. Explore **knowledge + memory graphs**; manage **memory** and governance.
+7. **Review/approve** agent outputs (HITL).
+
+### Architecture
+
+```mermaid
+flowchart TB
+  subgraph Browser
+    RSC[Next.js 16 App Router (RSC)] --> UIK[shadcn/ui + Tailwind design system]
+    RSC --> AISDK[Vercel AI SDK UI — streaming + generative UI]
+    AISDK --> REG[Widget Registry]
+    RSC --> Q[TanStack Query — server cache]
+    RSC --> Z[Zustand — ephemeral client state]
+    RSC --> RF[React Flow — agent/graph viz]
+  end
+  RSC -->|Server Actions / Route Handlers| BFF[Next API layer (BFF)]
+  BFF -->|REST + SSE/WS| API[RAGLab FastAPI + agent gateway]
+  API --> PIPE[Pipelines / LangGraph agents]
+  API --> MEM[Memory Platform]
+  API --> EVAL[Evaluation / Benchmarks]
+  API --> OBS[(LangFuse / LangSmith)]
+  API --> QD[(Qdrant)]
+  API --> DB[(Postgres / SQLite)]
+```
+
+### Key Features
+
+#### Chat Interface
+- **Streaming RAG responses** with citations and sources
+- **Generative UI widgets** (charts, tables, graphs, etc.)
+- **Retrieval trace inspection** for debugging
+- **Evaluation metrics display** (RAGAS scores, LLM-judge results)
+- **Multi-agent workflow support** with real-time steering
+
+#### Experiment Playground
+- **A/B testing** of RAG architectures, embeddings, retrievers
+- **Comparison** of RAGAS metrics, LLM-judge scores, and proxy metrics
+- **Cost and latency analysis** for each configuration
+- **Exportable results** for research and documentation
+
+#### Knowledge & Memory
+- **Document upload** and indexing preview
+- **Knowledge graph exploration** with GraphRAG integration
+- **Memory management** (episodic, semantic, working memory)
+- **Memory timeline** and governance UI
+
+#### Observability
+- **Real-time trace viewing** with LangFuse/LangSmith integration
+- **Performance dashboards** for agents, pipelines, and costs
+- **Error tracking** and debugging tools
+- **End-to-end trace id** propagation from browser → BFF → API
+
+#### Configuration & Governance
+- **RBAC** (Role-Based Access Control) with org/workspace/role isolation
+- **SSO integration** (OIDC/SAML) with optional Sign-in with Vercel
+- **Multi-tenant isolation** with per-tenant rate limits
+- **Audit logs** for GDPR compliance and security
+
+### Integration with Backend
+
+The frontend exposes these contracts from the existing Python backend:
+
+| Method | Path | Purpose | Status |
+|--------|------|---------|---|
+| POST | `/chat/stream` | SSE: text + widget + trace parts for a query/pipeline | new |
+| POST | `/query` | non-stream answer | ✅ |
+| GET | `/architectures`, `/components` | config center options | ✅/CLI |
+| POST | `/benchmark`, GET `/experiments`, `/dashboard` | playground + eval | ✅ |
+| GET | `/traces/{id}` | trajectory + retrieval trace + LangFuse link | new (data exists) |
+| POST | `/memory/remember`,`/recall` | memory operations | ✅ (this branch) |
+| GET | `/memory/timeline`,`/stats` | memory timeline + counts | ✅ |
+| DELETE | `/memory/{id}` | single memory delete | ✅ |
+| DELETE | `/memory?scope...` | GDPR erase by scope | ✅ |
+
+### Development
+
+#### Local Development
+
+```bash
+cd web
+npm run dev
+```
+
+The frontend runs on `http://localhost:3000` and proxies API requests to the backend.
+
+#### Build
+
+```bash
+cd web
+npm run build
+```
+
+#### Linting and Type Checking
+
+```bash
+cd web
+npm run lint
+npm run typecheck
+```
+
+### Project Structure
+
+```
+web/
+  app/
+    (marketing)/                       # public
+    (workspace)/
+      layout.tsx                       # AppShell + providers
+      chat/[threadId]/page.tsx
+      research/page.tsx
+      agents/page.tsx
+      knowledge/page.tsx
+      memory/page.tsx
+      experiments/page.tsx
+      evaluations/page.tsx
+      settings/page.tsx
+    api/
+      chat/route.ts                    # SSE proxy to backend stream
+      memory/route.ts  experiments/route.ts  traces/route.ts
+  components/
+    chat/  panels/  widgets/           # the Widget Registry components
+    agents/  research/  config/  charts/  graph/  ui/ (shadcn)
+  lib/
+    api-client.ts  stream.ts  registry.ts  zod-schemas.ts  auth.ts  rbac.ts
+  stores/                              # zustand slices
+  hooks/                               # useChatStream, useAgentGraph, useMemory
+  styles/                              # design tokens (glassmorphism, motion)
+  test/                                # vitest + playwright
+```
+
+### Widget Registry
+
+The backend emits **typed UI schemas** as streaming parts:
+
+```typescript
+type UIPart =
+  | { type: "text"; text: string }
+  | { type: "widget"; component: WidgetName; data: unknown; id: string;
+      children?: UIPart[]; streaming?: boolean };
+```
+
+**Registry widgets:**
+- Chart (Recharts/Tremor)
+- Table
+- Citation
+- Research report
+- Timeline
+- KnowledgeGraph (React Flow/D3)
+- Workflow
+- Agent status
+- Evaluation dashboard
+- RetrievalTrace
+- SourcePanel
+- DocPreview
+- CodeBlock
+- Mermaid
+
+### Deployment
+
+The frontend is deployed on Vercel (or container on K8s) with:
+- Edge CDN caching
+- ISR for dashboards
+- Fluid Compute for streaming routes
+- Environment-specific configurations
+
+### Roadmap
+
+1. **Foundation** — web/ scaffold, AppShell, auth, BFF `/chat/stream` proxy, streaming chat with text + Citation/Source widgets, RetrievalTrace ✅
+2. **Generative UI + agents** — Widget Registry breadth; React Flow agent graph from trajectory; reasoning trace; config center (no-code pipelines) 🔜
+3. **Experiment + observability** — playground A/B, eval dashboards, LangFuse/LangSmith views, cost/latency 🔜
+4. **Knowledge + memory** — GraphRAG + memory-graph viz, memory timeline + governance UI; deep research workspace 🔜
+5. **Enterprise** — RBAC/SSO, audit/GDPR UI, multimodal upload/preview, HITL review, multi-tenant hardening, scale-out (Postgres/Redis/queues), SOC2 🔜
+
+Each phase ships a vertical slice against the existing backend contracts; new backend endpoints are added just-in-time per phase.
+
 ## API
 
 ```bash
