@@ -19,7 +19,7 @@ function providerColor(provider?: string): string {
     case 'echo': return 'bg-amber-500'
     case 'cohere': return 'bg-rose-500'
     case 'hashing': return 'bg-cyan-500'
-    default: return 'bg-white/30'
+    default: return 'bg-slate-400/50'
   }
 }
 
@@ -100,22 +100,22 @@ export default function ChatPage() {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Config status bar */}
-        <div className="flex-shrink-0 border-b border-white/[0.06] px-4 py-1.5 bg-black/20 backdrop-blur-sm">
+        <div className="flex-shrink-0 border-b border-base px-4 py-1.5 surface backdrop-blur-sm">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
               <div className="flex items-center space-x-1">
                 <span className={cn('w-1 h-1 rounded-full', pipelineColorMap[selectedPipeline] || 'bg-cyan-400')} />
-                <span className="text-[10px] text-white/35">{pipelineInfo?.name || 'Naive RAG'}</span>
+                <span className="text-[10px] text-subtle">{pipelineInfo?.name || 'Naive RAG'}</span>
               </div>
-              <span className="text-white/[0.08]">/</span>
+              <span className="text-subtle">/</span>
               <div className="flex items-center space-x-1">
                 <span className={cn('w-1 h-1 rounded-full', providerColor(modelInfo?.provider))} />
-                <span className="text-[10px] text-white/35">{modelInfo?.name?.split(' ')[0] || 'Echo'}</span>
+                <span className="text-[10px] text-subtle">{modelInfo?.name?.split(' ')[0] || 'Echo'}</span>
               </div>
-              <span className="text-white/[0.08] hidden sm:inline">/</span>
+              <span className="text-subtle hidden sm:inline">/</span>
               <div className="items-center space-x-1 hidden sm:flex">
                 <span className={cn('w-1 h-1 rounded-full', providerColor(embedInfo?.provider))} />
-                <span className="text-[10px] text-white/35">{embedInfo?.name?.split(' ')[0] || 'Hashing'}</span>
+                <span className="text-[10px] text-subtle">{embedInfo?.name?.split(' ')[0] || 'Hashing'}</span>
               </div>
             </div>
 
@@ -123,7 +123,7 @@ export default function ChatPage() {
               onClick={() => setShowConfig(!showConfig)}
               className={cn(
                 'flex items-center space-x-1 px-2 py-0.5 rounded-md transition-all text-[10px]',
-                showConfig ? 'bg-cyan-500/10 text-cyan-300/80' : 'text-white/30 hover:text-white/50 hover:bg-white/[0.03]',
+                showConfig ? 'bg-cyan-500/10 text-cyan-300/80' : 'text-subtle hover:text-muted surface-hover',
               )}
             >
               <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@ export default function ChatPage() {
           </div>
 
           {showConfig && (
-            <div className="max-w-4xl mx-auto mt-2 pt-2.5 border-t border-white/[0.06] animate-slide-up">
+            <div className="max-w-4xl mx-auto mt-2 pt-2.5 border-t border-base animate-slide-up">
               <ModelSelector
                 selectedModel={selectedModel}
                 selectedEmbedding={selectedEmbedding}

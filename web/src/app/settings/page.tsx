@@ -7,7 +7,7 @@ function ToggleSwitch({ enabled, onChange, label }: { enabled: boolean; onChange
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 ${
-        enabled ? 'bg-gradient-to-r from-cyan-500 to-violet-600 shadow-sm shadow-cyan-500/20' : 'bg-white/[0.08]'
+        enabled ? 'bg-gradient-to-r from-cyan-500 to-violet-600 shadow-sm shadow-cyan-500/20' : 'surface-2'
       }`}
       role="switch"
       aria-checked={enabled}
@@ -35,12 +35,12 @@ export default function SettingsPage() {
     <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-gradient-cyan">Settings</h1>
-        <p className="text-sm text-white/40 mt-1">Manage your API keys and application preferences</p>
+        <p className="text-sm text-muted mt-1">Manage your API keys and application preferences</p>
       </div>
 
       {/* API Configuration */}
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-500/5 to-violet-500/5">
+        <div className="px-6 py-4 border-b border-base bg-gradient-to-r from-cyan-500/5 to-violet-500/5">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,25 +48,25 @@ export default function SettingsPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white/80">API Configuration</h2>
-              <p className="text-xs text-white/30">Configure your API keys for LLM providers</p>
+              <h2 className="text-lg font-semibold text-primary">API Configuration</h2>
+              <p className="text-xs text-subtle">Configure your API keys for LLM providers</p>
             </div>
           </div>
         </div>
         <div className="divide-y divide-white/[0.06]">
           {apiKeys.map((item) => (
-            <div key={item.name} className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors">
+            <div key={item.name} className="flex items-center justify-between px-6 py-4 hover:surface transition-colors">
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  item.configured ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.04] text-white/30'
+                  item.configured ? 'bg-emerald-500/10 text-emerald-400' : 'surface text-subtle'
                 }`}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
                 </div>
                 <div>
-                  <div className="font-medium text-sm text-white/70">{item.name}</div>
-                  <div className="text-xs text-white/30">{item.desc}</div>
+                  <div className="font-medium text-sm text-muted">{item.name}</div>
+                  <div className="text-xs text-subtle">{item.desc}</div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -76,7 +76,7 @@ export default function SettingsPage() {
                     <span>Configured</span>
                   </span>
                 )}
-                <button className="px-3 py-1.5 bg-white/[0.06] text-white/50 rounded-lg text-xs font-medium hover:bg-white/[0.1] hover:text-white/70 transition-all active:scale-95">
+                <button className="px-3 py-1.5 surface-2 text-muted rounded-lg text-xs font-medium surface-hover hover:text-muted transition-all active:scale-95">
                   {item.configured ? 'Update' : 'Configure'}
                 </button>
               </div>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
       {/* Preferences */}
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.06] bg-gradient-to-r from-violet-500/5 to-rose-500/5">
+        <div className="px-6 py-4 border-b border-base bg-gradient-to-r from-violet-500/5 to-rose-500/5">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-rose-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,8 +95,8 @@ export default function SettingsPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white/80">Preferences</h2>
-              <p className="text-xs text-white/30">Customize your workspace experience</p>
+              <h2 className="text-lg font-semibold text-primary">Preferences</h2>
+              <p className="text-xs text-subtle">Customize your workspace experience</p>
             </div>
           </div>
         </div>
@@ -109,8 +109,8 @@ export default function SettingsPage() {
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-sm text-white/70">Dark Mode</div>
-                <div className="text-xs text-white/30">Toggle dark theme</div>
+                <div className="font-medium text-sm text-muted">Dark Mode</div>
+                <div className="text-xs text-subtle">Toggle dark theme</div>
               </div>
             </div>
             <ToggleSwitch enabled={darkMode} onChange={setDarkMode} label="Dark Mode" />
@@ -123,8 +123,8 @@ export default function SettingsPage() {
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-sm text-white/70">Auto-refresh</div>
-                <div className="text-xs text-white/30">Auto-refresh experiment results</div>
+                <div className="font-medium text-sm text-muted">Auto-refresh</div>
+                <div className="text-xs text-subtle">Auto-refresh experiment results</div>
               </div>
             </div>
             <ToggleSwitch enabled={autoRefresh} onChange={setAutoRefresh} label="Auto-refresh" />

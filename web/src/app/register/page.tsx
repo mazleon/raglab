@@ -39,7 +39,7 @@ export default function RegisterPage() {
         )}
         <SubmitButton loading={register.isPending}>Create account</SubmitButton>
       </form>
-      <p className="mt-6 text-center text-xs text-white/40">
+      <p className="mt-6 text-center text-xs text-muted">
         Already have an account?{' '}
         <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-medium">Sign in</Link>
       </p>

@@ -42,13 +42,13 @@ export function Composer({ onSend, isLoading, onStop, placeholder, pipeline: _pi
   }
 
   return (
-    <div className="border-t border-white/[0.06] bg-black/40 backdrop-blur-xl px-4 py-3">
+    <div className="border-t border-base surface-2 backdrop-blur-xl px-4 py-3">
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
         <div className="flex items-end space-x-2">
           {/* Pipeline badge — small inline indicator */}
-          <div className="flex items-center space-x-1.5 px-2.5 py-2 border border-white/[0.06] rounded-lg bg-white/[0.03] flex-shrink-0">
+          <div className="flex items-center space-x-1.5 px-2.5 py-2 border border-base rounded-lg surface flex-shrink-0">
             <span className={cn('w-1.5 h-1.5 rounded-full', pipelineColor || 'bg-cyan-400')} />
-            <span className="text-[10px] text-white/40 font-medium">{pipelineName || 'Naive'}</span>
+            <span className="text-[10px] text-muted font-medium">{pipelineName || 'Naive'}</span>
           </div>
 
           {/* Textarea */}
@@ -62,9 +62,9 @@ export function Composer({ onSend, isLoading, onStop, placeholder, pipeline: _pi
               rows={1}
               disabled={isLoading}
               className={cn(
-                'w-full px-3.5 py-2 pr-10 border border-white/[0.06] rounded-lg',
-                'bg-white/[0.03] text-white/85 placeholder:text-white/20',
-                'focus:outline-none focus:border-cyan-500/25 focus:bg-white/[0.05]',
+                'w-full px-3.5 py-2 pr-10 border border-base rounded-lg',
+                'surface text-primary placeholder:text-subtle',
+                'focus:outline-none focus:border-cyan-500/25 focus:surface',
                 'transition-all resize-none min-h-[36px] max-h-[160px] text-sm',
                 'disabled:opacity-50'
               )}
@@ -91,7 +91,7 @@ export function Composer({ onSend, isLoading, onStop, placeholder, pipeline: _pi
                 'flex items-center justify-center w-[36px] h-[36px] rounded-lg font-medium transition-all duration-200 flex-shrink-0',
                 input.trim() && !isLoading
                   ? 'bg-gradient-to-r from-cyan-500 to-violet-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95'
-                  : 'bg-white/[0.04] text-white/20 cursor-not-allowed'
+                  : 'surface text-subtle cursor-not-allowed'
               )}
             >
               {isLoading ? (
@@ -108,13 +108,13 @@ export function Composer({ onSend, isLoading, onStop, placeholder, pipeline: _pi
         </div>
 
         <div className="flex items-center justify-between mt-1.5 px-1">
-          <span className="text-[9px] text-white/20">
-            <kbd className="px-1 py-0.5 rounded bg-white/[0.05] font-mono text-[8px] text-white/30">Enter</kbd>
+          <span className="text-[9px] text-subtle">
+            <kbd className="px-1 py-0.5 rounded surface font-mono text-[8px] text-subtle">Enter</kbd>
             <span className="mx-1">send ·</span>
-            <kbd className="px-1 py-0.5 rounded bg-white/[0.05] font-mono text-[8px] text-white/30">Shift+Enter</kbd>
+            <kbd className="px-1 py-0.5 rounded surface font-mono text-[8px] text-subtle">Shift+Enter</kbd>
             <span className="ml-0.5">new line</span>
           </span>
-          <span className="text-[9px] text-white/20">
+          <span className="text-[9px] text-subtle">
             {pipelineName || 'Naive'}
           </span>
         </div>

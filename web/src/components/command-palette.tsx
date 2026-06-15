@@ -83,9 +83,9 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
       <div className="fixed left-1/2 top-[15%] w-full max-w-lg -translate-x-1/2 animate-scale-in">
         <div className="glass-panel rounded-2xl shadow-2xl shadow-violet-500/20 overflow-hidden border-cyan-500/10">
           {/* Search */}
-          <div className="p-3 border-b border-white/[0.06]">
+          <div className="p-3 border-b border-base">
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -94,7 +94,7 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setSelectedIndex(0) }}
                 placeholder="Search actions..."
-                className="w-full px-4 py-2.5 pl-10 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-cyan-500/30 transition-all"
+                className="w-full px-4 py-2.5 pl-10 surface border border-base rounded-xl text-sm text-primary placeholder:text-subtle focus:outline-none focus:border-cyan-500/30 transition-all"
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
           {/* Results */}
           <div className="max-h-80 overflow-y-auto p-2">
             {filtered.length === 0 ? (
-              <div className="text-center py-8 text-white/30">
+              <div className="text-center py-8 text-subtle">
                 <svg className="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
                 </svg>
@@ -114,7 +114,7 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
                 if (groupItems.length === 0) return null
                 return (
                   <div key={group.group}>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-white/30 px-3 py-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-subtle px-3 py-2">
                       {group.group}
                     </div>
                     {groupItems.map((item) => {
@@ -126,19 +126,19 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
                           className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-150 flex items-center space-x-3 ${
                             isSelected
                               ? 'bg-gradient-to-r from-cyan-500/10 to-violet-500/10 text-white shadow-sm neon-ring'
-                              : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]'
+                              : 'text-muted hover:text-muted surface-hover'
                           }`}
                           onClick={() => { router.push(item.href); onOpenChange(false) }}
                           onMouseEnter={() => setSelectedIndex(idx)}
                         >
                           <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                            isSelected ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-cyan-400' : 'bg-white/[0.04] text-white/30'
+                            isSelected ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-cyan-400' : 'surface text-subtle'
                           }`}>
                             <ActionIcon icon={item.icon} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium">{item.label}</div>
-                            <div className="text-[10px] text-white/30 truncate">{item.description}</div>
+                            <div className="text-[10px] text-subtle truncate">{item.description}</div>
                           </div>
                           {isSelected && (
                             <kbd className="flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono">↵</kbd>
@@ -153,13 +153,13 @@ function CommandPaletteContent({ onOpenChange }: { onOpenChange: (open: boolean)
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2.5 border-t border-white/[0.06] bg-black/20">
-            <div className="flex items-center justify-between text-[10px] text-white/25">
+          <div className="px-4 py-2.5 border-t border-base surface">
+            <div className="flex items-center justify-between text-[10px] text-subtle">
               <div className="flex items-center space-x-3">
-                <span><kbd className="px-1 py-0.5 rounded bg-white/[0.06] font-mono">↑↓</kbd> Navigate</span>
-                <span><kbd className="px-1 py-0.5 rounded bg-white/[0.06] font-mono">↵</kbd> Select</span>
+                <span><kbd className="px-1 py-0.5 rounded surface-2 font-mono">↑↓</kbd> Navigate</span>
+                <span><kbd className="px-1 py-0.5 rounded surface-2 font-mono">↵</kbd> Select</span>
               </div>
-              <span><kbd className="px-1 py-0.5 rounded bg-white/[0.06] font-mono">⌘K</kbd> Toggle · <kbd className="px-1 py-0.5 rounded bg-white/[0.06] font-mono">ESC</kbd> Close</span>
+              <span><kbd className="px-1 py-0.5 rounded surface-2 font-mono">⌘K</kbd> Toggle · <kbd className="px-1 py-0.5 rounded surface-2 font-mono">ESC</kbd> Close</span>
             </div>
           </div>
         </div>

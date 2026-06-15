@@ -13,13 +13,13 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-white/90">{title}</h1>
-          <p className="text-sm text-white/40 mt-1">{subtitle}</p>
+          <h1 className="text-xl font-semibold text-primary">{title}</h1>
+          <p className="text-sm text-muted mt-1">{subtitle}</p>
         </div>
         <div className="glass-panel rounded-2xl p-6 shadow-2xl shadow-violet-500/10">
           {children}
         </div>
-        <p className="mt-6 text-center text-[10px] uppercase tracking-[0.15em] text-white/20">
+        <p className="mt-6 text-center text-[10px] uppercase tracking-[0.15em] text-subtle">
           RAGLab · Agentic Intelligence Workspace
         </p>
       </div>
@@ -42,7 +42,7 @@ interface FieldProps {
 export function Field({ label, value, onChange, type = 'text', placeholder, autoComplete, required, minLength, hint }: FieldProps) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] font-semibold uppercase tracking-wider text-white/40">{label}</label>
+      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</label>
       <input
         type={type}
         value={value}
@@ -51,9 +51,9 @@ export function Field({ label, value, onChange, type = 'text', placeholder, auto
         autoComplete={autoComplete}
         required={required}
         minLength={minLength}
-        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/85 placeholder:text-white/25 focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.06] transition-all"
+        className="w-full px-3.5 py-2.5 rounded-xl surface border border-base text-sm text-primary placeholder:text-subtle focus:outline-none focus:border-cyan-500/40 focus:surface-2 transition-all"
       />
-      {hint && <p className="text-[10px] text-white/30">{hint}</p>}
+      {hint && <p className="text-[10px] text-subtle">{hint}</p>}
     </div>
   )
 }
