@@ -90,11 +90,32 @@ class QdrantStore:
 
         dist = Distance[_DISTANCE.get(self._distance, "Cosine").upper()]
         if self._client.collection_exists(self.collection):
+            self._assert_dim(dim)
             return
         self._client.create_collection(
             collection_name=self.collection,
             vectors_config=VectorParams(size=dim, distance=dist),
         )
+
+    def _assert_dim(self, dim: int) -> None:
+        """Fail fast with a clear message if an existing collection's vector size
+        doesn't match the current embedder — otherwise the mismatch only surfaces
+        as a raw Qdrant 400 deep inside a query."""
+
+        from raglab.errors import ConfigError
+
+        try:
+            info = self._client.get_collection(self.collection)
+            vectors = info.config.params.vectors
+            existing = vectors.size if hasattr(vectors, "size") else None
+        except Exception:  # noqa: BLE001 - can't introspect; let the query surface issues
+            return
+        if existing is not None and int(existing) != int(dim):
+            raise ConfigError(
+                f"Collection {self.collection!r} was created with vector dim "
+                f"{existing}, but the current embedding produces dim {dim}. "
+                "Use a matching embedding, or re-ingest into a fresh collection."
+            )
 
     def upsert(self, chunks: list[Chunk], vectors: list[Vector]) -> None:
         from qdrant_client.models import PointStruct

@@ -1,0 +1,92 @@
+INFO:     Will watch for changes in these directories: ['/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [49922] using StatReload
+INFO:     Started server process [49925]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:59350 - "GET /health HTTP/1.1" 200 OK
+RAGLAB_JWT_SECRET is not set — using an insecure dev secret. Set RAGLAB_JWT_SECRET in production.
+INFO:     127.0.0.1:59352 - "POST /chat/stream HTTP/1.1" 200 OK
+RAGLAB_JWT_SECRET is not set — using an insecure dev secret. Set RAGLAB_JWT_SECRET in production.
+INFO:     127.0.0.1:59355 - "GET /conversations HTTP/1.1" 200 OK
+chat stream failed
+Traceback (most recent call last):
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/server/streaming.py", line 114, in chat_event_stream
+    result: RAGResult = await anyio.to_thread.run_sync(engine.answer, query)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/anyio/to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/service.py", line 45, in answer
+    result = self.pipeline.run(query)
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/pipelines/hybrid.py", line 19, in run
+    candidates = self.c.retriever.retrieve(query, cfg.retrieval.k)
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/retrievers/hybrid.py", line 35, in retrieve
+    dense_hits = self.dense.retrieve(query, self.dense_k)
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/retrievers/dense.py", line 18, in retrieve
+    return self.store.search(vector, k)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/src/raglab/vectorstores/qdrant_store.py", line 138, in search
+    response = self._client.query_points(
+        collection_name=self.collection,
+    ...<3 lines>...
+        with_payload=True,
+    )
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/qdrant_client.py", line 423, in query_points
+    return self._client.query_points(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        collection_name=collection_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<14 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/qdrant_remote.py", line 585, in query_points
+    query_result = self.http.search_api.query_points(
+        collection_name=collection_name,
+    ...<2 lines>...
+        query_request=query_request,
+    )
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/http/api/search_api.py", line 783, in query_points
+    return self._build_for_query_points(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        collection_name=collection_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        query_request=query_request,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/http/api/search_api.py", line 181, in _build_for_query_points
+    return self.api_client.request(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        type_=m.InlineResponse20024,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        content=body,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/http/api_client.py", line 95, in request
+    return self.send(request, type_)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/saniyasultanatuba/Downloads/05_Project_Files/dev/agentic-rag-evaluations/raglab/.venv/lib/python3.13/site-packages/qdrant_client/http/api_client.py", line 130, in send
+    raise UnexpectedResponse.for_response(response)
+qdrant_client.http.exceptions.UnexpectedResponse: Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Wrong input: Vector dimension error: expected dim: 384, got 3072"},"time":0.00047409}'
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [49925]
+INFO:     Stopping reloader process [49922]

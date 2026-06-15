@@ -44,7 +44,15 @@ class OpenAIEmbedder:
 
     def embed_documents(self, texts: list[str]) -> list[Vector]:
         client = self._ensure()
-        resp = client.embeddings.create(model=self._model, input=texts)
+        # text-embedding-3-* support truncating to a requested size via the
+        # `dimensions` param. Pass it when the requested dim differs from native
+        # so what we produce always matches what we report (and what sized the
+        # collection). ada-002 ignores it.
+        kwargs: dict[str, Any] = {"model": self._model, "input": texts}
+        native = _DIMS.get(self._model, 3072)
+        if self._model.startswith("text-embedding-3") and self._dim != native:
+            kwargs["dimensions"] = self._dim
+        resp = client.embeddings.create(**kwargs)
         return [d.embedding for d in resp.data]
 
     def embed_query(self, text: str) -> Vector:

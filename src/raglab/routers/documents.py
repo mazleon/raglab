@@ -21,7 +21,7 @@ from raglab.errors import RaglabError
 from raglab.ingestion import store as docstore
 from raglab.ingestion.store import DocumentRecord
 from raglab.server.deps import current_user
-from raglab.server.sessions import build_session_config, ingest_file, tenant_collection
+from raglab.server.sessions import build_session_config, ingest_file
 
 logger = logging.getLogger("raglab.documents")
 
@@ -61,18 +61,19 @@ def upload(
     dest = _upload_dir(user.tenant_id) / f"{doc_id}_{filename}"
     dest.write_bytes(data)
 
+    # Resolve the session config first so the document is registered against the
+    # exact collection chat will query (name encodes tenant + embedding + dim).
+    cfg = build_session_config(
+        tenant_id=user.tenant_id, overrides={"embedding": {"name": embedding}}
+    )
     record = DocumentRecord(
         id=doc_id, tenant_id=user.tenant_id, name=filename,
         type=file.content_type or suffix, size=len(data), status="indexing",
-        embedding=embedding, collection=tenant_collection(user.tenant_id, embedding),
-        path=str(dest),
+        embedding=embedding, collection=cfg.collection, path=str(dest),
     )
     record = docstore.create(record)
 
     try:
-        cfg = build_session_config(
-            tenant_id=user.tenant_id, overrides={"embedding": {"name": embedding}}
-        )
         chunks = ingest_file(cfg, dest)
         docstore.update_status(record.id, "indexed", chunks=chunks)
     except RaglabError as exc:

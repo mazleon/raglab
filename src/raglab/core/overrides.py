@@ -74,5 +74,17 @@ def apply_overrides(
     clean = sanitize_overrides(overrides)
     if not clean:
         return base
-    merged = _deep_merge(base.model_dump(), clean)
+    base_data = base.model_dump()
+
+    # Switching the embedding provider must NOT inherit the previous provider's
+    # model/dim — e.g. a hashing base (dim 384) must not size an OpenAI
+    # collection. Drop them unless the override supplies its own.
+    emb = clean.get("embedding")
+    if isinstance(emb, dict) and "name" in emb and emb["name"] != base_data["embedding"]["name"]:
+        if "model" not in emb:
+            base_data["embedding"]["model"] = None
+        if "dim" not in emb:
+            base_data["embedding"]["dim"] = None
+
+    merged = _deep_merge(base_data, clean)
     return config_from_dict(merged)

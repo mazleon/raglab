@@ -35,6 +35,16 @@ _PIPELINE_CONFIGS = {
     "agentic": "configs/pipelines/agentic.yaml",
 }
 
+# Deterministic default embedding model per provider. Keeps the resolved vector
+# dimension (and therefore the collection) stable for the app, and matches the
+# models the UI advertises (avoids surprise: OpenAIEmbedder alone defaults to the
+# larger 3072-dim model).
+_DEFAULT_EMBED_MODELS = {
+    "openai": "text-embedding-3-small",
+    "cohere": "embed-english-v3.0",
+    "gemini": "text-embedding-004",
+}
+
 _engine_cache: dict[str, Engine] = {}
 _lock = threading.Lock()
 
@@ -47,8 +57,25 @@ def vector_dir() -> str:
     return os.environ.get("RAGLAB_VECTOR_DIR", "qdrant_storage")
 
 
-def tenant_collection(tenant_id: str, embedding_name: str) -> str:
-    return f"rag_{_slug(tenant_id)}_{_slug(embedding_name)}"
+def embedding_dim(embedding_name: str, model: str | None = None, dim: int | None = None) -> int:
+    """Resolve an embedder's vector dimension without making a network call.
+
+    Constructing the embedder is cheap (clients are lazy), and reading ``.dim``
+    is authoritative — it's exactly what will size/query the collection.
+    """
+
+    from raglab.core.config import EmbeddingCfg, build_embedder
+
+    try:
+        return int(build_embedder(EmbeddingCfg(name=embedding_name, model=model, dim=dim)).dim)
+    except Exception:  # noqa: BLE001 - fall back to a stable bucket if unresolvable
+        return 0
+
+
+def tenant_collection(tenant_id: str, embedding_name: str, dim: int) -> str:
+    # The dimension is part of the name so two embeddings of different sizes can
+    # never collide in one collection (which would 400 at query time).
+    return f"rag_{_slug(tenant_id)}_{_slug(embedding_name)}_{dim}"
 
 
 def base_config_path(pipeline: str | None) -> str:
@@ -70,7 +97,18 @@ def build_session_config(
     cfg = apply_overrides(cfg, overrides)
 
     data = cfg.model_dump()
-    data["collection"] = tenant_collection(tenant_id, cfg.embedding.name)
+
+    # Pin a deterministic default model per provider so that document upload and
+    # chat — which both compose through here — resolve the SAME model → dim →
+    # collection even when the client didn't specify a model.
+    if not data["embedding"].get("model"):
+        default_model = _DEFAULT_EMBED_MODELS.get(data["embedding"]["name"])
+        if default_model:
+            data["embedding"]["model"] = default_model
+
+    emb_cfg = data["embedding"]
+    dim = embedding_dim(emb_cfg["name"], emb_cfg["model"], emb_cfg["dim"])
+    data["collection"] = tenant_collection(tenant_id, emb_cfg["name"], dim)
 
     qdrant_url = os.environ.get("QDRANT_URL")
     if qdrant_url:
