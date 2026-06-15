@@ -2,23 +2,34 @@
 
 export default function AgentsPage() {
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Agents
-        </h1>
-        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-          New Agent
+        <div>
+          <h1 className="text-2xl font-bold text-gradient-cyan">Agents</h1>
+          <p className="text-sm text-white/40 mt-1">Configure and manage AI agent workflows</p>
+        </div>
+        <button className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-violet-600 text-white rounded-xl font-medium text-sm btn-glow-cyan active:scale-95">
+          <span className="flex items-center space-x-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <span>New Agent</span>
+          </span>
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
-        <div className="text-gray-500 dark:text-gray-400 mb-4">
-          Agent management interface
+      <div className="flex flex-col items-center justify-center py-20 glass-card rounded-2xl border-dashed border-white/[0.06]">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center mb-5 neon-ring">
+          <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
         </div>
-        <div className="text-sm text-gray-400 dark:text-gray-500">
-          Configure and manage AI agent workflows
-        </div>
+        <h3 className="text-xl font-semibold text-white/70 mb-2">No agents configured</h3>
+        <p className="text-sm text-white/30 mb-8 max-w-md text-center">Create AI agents with custom prompts, tools, and model configurations</p>
+        <button className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-violet-600 text-white rounded-xl font-medium text-sm btn-glow-cyan active:scale-95">
+          <span className="flex items-center space-x-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <span>Create Your First Agent</span>
+          </span>
+        </button>
       </div>
     </div>
   )

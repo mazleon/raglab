@@ -29,6 +29,10 @@ class ConfigError(RaglabError):
     """Invalid or inconsistent configuration."""
 
 
+class AuthError(RaglabError):
+    """Authentication or authorization failure (HTTP 401)."""
+
+
 class MissingDependencyError(RaglabError):
     """A required optional dependency (extra) is not installed."""
 
