@@ -37,10 +37,21 @@ def _extract_question(content: str) -> str:
     return lines[-1] if lines else content
 
 
+_SOURCE_HEADER = re.compile(r"^\[\d+\]\s*\(source:.*\)\s*$")
+
+
 def _extract_context(content: str) -> str:
     # Everything before a trailing "Question:" line is treated as context.
     parts = re.split(r"\n\s*Question:", content, maxsplit=1)
-    return parts[0]
+    raw = parts[0]
+    # Strip the "Context:" label and per-chunk "[n] (source: ...)" headers so
+    # only the document text is a candidate answer — not the prompt scaffolding.
+    cleaned = [
+        line
+        for line in raw.splitlines()
+        if line.strip().lower() != "context:" and not _SOURCE_HEADER.match(line.strip())
+    ]
+    return "\n".join(cleaned)
 
 
 @register("llm", "echo")
@@ -60,7 +71,12 @@ class EchoLLM:
         return self._model
 
     def generate(self, messages: list[dict[str, str]], **_: object) -> LLMResponse:
-        content = "\n".join(m.get("content", "") for m in messages)
+        # Only ever extract from non-system messages — the system prompt must
+        # never be a candidate answer (otherwise a retrieval miss leaks
+        # "You are a precise assistant." as the answer).
+        content = "\n".join(
+            m.get("content", "") for m in messages if m.get("role") != "system"
+        )
         question = _extract_question(content)
         context = _extract_context(content)
         q_tokens = _tokens(question)
@@ -72,7 +88,13 @@ class EchoLLM:
             reverse=True,
         )
         top = [s for s in scored[:2] if q_tokens & _tokens(s)]
-        answer = " ".join(top) if top else (scored[0] if scored else "I don't know.")
+        # No lexical overlap → be honest rather than returning an unrelated
+        # sentence. (Echo is extractive; swap to a real LLM for generation.)
+        answer = (
+            " ".join(top)
+            if top
+            else "I couldn't find an answer to that in the provided documents."
+        )
 
         prompt_tokens = len(content.split())
         completion_tokens = len(answer.split())

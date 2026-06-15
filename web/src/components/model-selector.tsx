@@ -29,20 +29,20 @@ function SelectGroup<T extends { id: string; name: string; description: string; 
   return (
     <div className={compact ? '' : 'space-y-2'}>
       {!compact && (
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{label}</label>
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-muted">{label}</label>
       )}
       <div className="relative">
         <select
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'w-full appearance-none border border-white/[0.08] rounded-xl bg-white/[0.04] text-sm text-white/70',
+            'w-full appearance-none border border-base rounded-xl surface text-sm text-muted',
             'focus:outline-none focus:border-cyan-500/40 transition-all cursor-pointer',
             compact ? 'px-2.5 py-2 pr-7 text-xs min-w-[100px]' : 'px-3 py-2.5 pr-9',
           )}
         >
           {items.length === 0 && (
-            <option value="" className="bg-slate-900 text-white/30">Loading...</option>
+            <option value="" className="bg-slate-900 text-subtle">Loading...</option>
           )}
           {items.map((item) => (
             <option
@@ -56,14 +56,14 @@ function SelectGroup<T extends { id: string; name: string; description: string; 
           ))}
         </select>
         {/* Dropdown arrow */}
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-subtle">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
       {!compact && selected && (
-        <p className="text-[10px] text-white/30 mt-1">{selected.description}</p>
+        <p className="text-[10px] text-subtle mt-1">{selected.description}</p>
       )}
     </div>
   )
@@ -77,7 +77,7 @@ export function ModelSelector(props: ModelSelectorProps) {
     return (
       <div className="grid grid-cols-3 gap-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-10 rounded-xl bg-white/[0.04] animate-pulse" />
+          <div key={i} className="h-10 rounded-xl surface animate-pulse" />
         ))}
       </div>
     )

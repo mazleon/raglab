@@ -19,7 +19,7 @@ export function TenantSwitcher({ className }: TenantSwitcherProps) {
   return (
     <div
       className={cn(
-        'flex items-center space-x-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]',
+        'flex items-center space-x-2 px-3 py-2 rounded-xl surface border border-base',
         className,
       )}
       title={`Workspace: ${user.tenant_id} · ${user.role}`}
@@ -29,7 +29,7 @@ export function TenantSwitcher({ className }: TenantSwitcherProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-8M9 3H5a2 2 0 00-2 2v16a2 2 0 002 2h4M19 21v-6a2 2 0 00-2-2h-6a2 2 0 00-2 2v6" />
         </svg>
       </div>
-      <span className="text-sm font-medium text-white/60 max-w-28 truncate capitalize hidden sm:block">
+      <span className="text-sm font-medium text-muted max-w-28 truncate capitalize hidden sm:block">
         {user.tenant_id}
       </span>
     </div>

@@ -35,7 +35,7 @@ function LoginForm() {
         )}
         <SubmitButton loading={login.isPending}>Sign in</SubmitButton>
       </form>
-      <p className="mt-6 text-center text-xs text-white/40">
+      <p className="mt-6 text-center text-xs text-muted">
         New here?{' '}
         <Link href="/register" className="text-cyan-400 hover:text-cyan-300 font-medium">Create an account</Link>
       </p>

@@ -10,14 +10,14 @@ interface ExperimentListProps {
 export function ExperimentList({ experiments }: ExperimentListProps) {
   if (experiments.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 glass-card rounded-2xl border-dashed border-white/[0.06]">
+      <div className="flex flex-col items-center justify-center py-20 glass-card rounded-2xl border-dashed border-base">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center mb-4 neon-ring">
           <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-5.384-.986a2 2 0 01-1.148-1.148l-.986-5.384a2 2 0 00-3.6 0L5.924 8.884a2 2 0 00-.547 1.022l.986 5.384a2 2 0 001.148 1.148l5.384.986a2 2 0 003.6 0z" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-white/70 mb-1">No experiments found</h3>
-        <p className="text-sm text-white/30 mb-6">Run a benchmark to see results here</p>
+        <h3 className="text-lg font-semibold text-muted mb-1">No experiments found</h3>
+        <p className="text-sm text-subtle mb-6">Run a benchmark to see results here</p>
         <button className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-violet-600 text-white rounded-xl font-medium text-sm btn-glow-cyan active:scale-95">
           New Experiment
         </button>
@@ -54,12 +54,12 @@ function ExperimentCard({ experiment, index }: { experiment: Experiment; index: 
     return (
       <div className="space-y-1">
         <div className="flex justify-between text-xs">
-          <span className="text-white/40">{label}</span>
-          <span className={cn('font-mono font-medium', value >= 0.6 ? 'text-white/70' : 'text-rose-400')}>
+          <span className="text-muted">{label}</span>
+          <span className={cn('font-mono font-medium', value >= 0.6 ? 'text-muted' : 'text-rose-400')}>
             {pct.toFixed(0)}%
           </span>
         </div>
-        <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+        <div className="w-full h-1.5 surface-2 rounded-full overflow-hidden">
           <div
             className={cn('h-full rounded-full bg-gradient-to-r transition-all duration-500', bar)}
             style={{ width: `${pct}%` }}
@@ -81,35 +81,35 @@ function ExperimentCard({ experiment, index }: { experiment: Experiment; index: 
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
-            <h3 className="font-semibold text-white/80 truncate text-sm">
+            <h3 className="font-semibold text-primary truncate text-sm">
               {experiment.architecture} — {experiment.embedding}
             </h3>
-            <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/[0.04]', badge.color)}>
+            <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold surface', badge.color)}>
               {badge.label}
             </span>
           </div>
-          <div className="flex items-center space-x-2 text-xs text-white/30">
-            <span className="px-1.5 py-0.5 rounded bg-white/[0.04] font-mono text-[10px]">{experiment.architecture}</span>
+          <div className="flex items-center space-x-2 text-xs text-subtle">
+            <span className="px-1.5 py-0.5 rounded surface font-mono text-[10px]">{experiment.architecture}</span>
             <span>•</span>
             <span>{experiment.embedding}</span>
           </div>
         </div>
         <div className="flex-shrink-0 text-right">
-          <div className="text-[10px] text-white/30">
+          <div className="text-[10px] text-subtle">
             {new Date(experiment.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </div>
         </div>
       </div>
 
       {/* Score Overview */}
-      <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-cyan-500/5 to-violet-500/5 border border-white/[0.04]">
+      <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-cyan-500/5 to-violet-500/5 border border-base">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-white/40">Average Score</span>
+          <span className="text-xs font-medium text-muted">Average Score</span>
           <span className={cn('text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent', badge.bar)}>
             {(avgScore * 100).toFixed(0)}%
           </span>
         </div>
-        <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+        <div className="w-full h-2 surface-2 rounded-full overflow-hidden">
           <div
             className={cn('h-full rounded-full bg-gradient-to-r transition-all duration-700', badge.bar)}
             style={{ width: `${avgScore * 100}%` }}
@@ -124,14 +124,14 @@ function ExperimentCard({ experiment, index }: { experiment: Experiment; index: 
 
         <div className="pt-2 mt-2 divider-glow grid grid-cols-2 gap-3">
           <div>
-            <div className="text-[10px] text-white/30 mb-0.5">Latency</div>
-            <div className="text-sm font-semibold text-white/80 font-mono">
-              {experiment.avg_latency_ms.toFixed(0)}<span className="text-[10px] text-white/30 font-normal">ms</span>
+            <div className="text-[10px] text-subtle mb-0.5">Latency</div>
+            <div className="text-sm font-semibold text-primary font-mono">
+              {experiment.avg_latency_ms.toFixed(0)}<span className="text-[10px] text-subtle font-normal">ms</span>
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-white/30 mb-0.5">Cost</div>
-            <div className="text-sm font-semibold text-white/80 font-mono">
+            <div className="text-[10px] text-subtle mb-0.5">Cost</div>
+            <div className="text-sm font-semibold text-primary font-mono">
               ${experiment.total_cost_usd.toFixed(4)}
             </div>
           </div>

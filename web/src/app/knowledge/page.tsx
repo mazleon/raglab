@@ -67,14 +67,14 @@ export default function KnowledgePage() {
       <div className="flex justify-between items-center gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-gradient-cyan">Knowledge</h1>
-          <p className="text-sm text-white/40 mt-1">Upload and manage documents for RAG ingestion</p>
+          <p className="text-sm text-muted mt-1">Upload and manage documents for RAG ingestion</p>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Embedding</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted">Embedding</label>
           <select
             value={embedding}
             onChange={(e) => setEmbedding(e.target.value)}
-            className="appearance-none border border-white/[0.08] rounded-xl bg-white/[0.04] text-xs text-white/70 px-3 py-2 pr-7 focus:outline-none focus:border-cyan-500/40 cursor-pointer"
+            className="appearance-none border border-base rounded-xl surface text-xs text-muted px-3 py-2 pr-7 focus:outline-none focus:border-cyan-500/40 cursor-pointer"
           >
             {(config?.embeddings ?? [{ id: 'hashing', name: 'Hashing (Offline)', available: true }]).map((e) => (
               <option key={e.id} value={e.id} disabled={e.available === false} className="bg-slate-900">
@@ -98,7 +98,7 @@ export default function KnowledgePage() {
           'relative p-10 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all duration-300',
           isDragOver
             ? 'border-cyan-400/50 bg-cyan-500/5 shadow-lg shadow-cyan-500/10'
-            : 'border-white/[0.08] bg-white/[0.02] hover:border-cyan-500/20 hover:bg-cyan-500/[0.03]',
+            : 'border-base surface hover:border-cyan-500/20 hover:bg-cyan-500/[0.03]',
         )}
       >
         <input
@@ -111,16 +111,16 @@ export default function KnowledgePage() {
         />
         <div className={cn(
           'w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all duration-300',
-          isDragOver ? 'bg-cyan-500/20 scale-110 neon-ring' : 'bg-white/[0.04]',
+          isDragOver ? 'bg-cyan-500/20 scale-110 neon-ring' : 'surface',
         )}>
-          <svg className={cn('w-8 h-8 transition-colors', isDragOver ? 'text-cyan-400' : 'text-white/30')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={cn('w-8 h-8 transition-colors', isDragOver ? 'text-cyan-400' : 'text-subtle')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </div>
-        <p className="text-sm font-medium text-white/60 mb-1">
+        <p className="text-sm font-medium text-muted mb-1">
           {isDragOver ? 'Drop files here' : 'Drag & drop files or click to browse'}
         </p>
-        <p className="text-[10px] text-white/30">PDF, Markdown, TXT, CSV, DOCX — up to 50MB</p>
+        <p className="text-[10px] text-subtle">PDF, Markdown, TXT, CSV, DOCX — up to 50MB</p>
         {uploadMutation.isPending && (
           <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-cyan-400">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -131,21 +131,21 @@ export default function KnowledgePage() {
 
       {/* Document List */}
       <div className="glass-panel rounded-2xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white/70">
+        <div className="px-5 py-3 border-b border-base flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-muted">
             Indexed Documents
-            <span className="ml-2 text-xs text-white/30 font-normal">({documents.length})</span>
+            <span className="ml-2 text-xs text-subtle font-normal">({documents.length})</span>
           </h2>
         </div>
 
         {isLoading ? (
           <div className="p-8 space-y-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-14 rounded-xl bg-white/[0.04] animate-pulse" />
+              <div key={i} className="h-14 rounded-xl surface animate-pulse" />
             ))}
           </div>
         ) : documents.length === 0 ? (
-          <div className="flex flex-col items-center py-12 text-white/30">
+          <div className="flex flex-col items-center py-12 text-subtle">
             <svg className="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -154,7 +154,7 @@ export default function KnowledgePage() {
         ) : (
           <div className="divide-y divide-white/[0.06]">
             {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.02] transition-colors group">
+              <div key={doc.id} className="flex items-center justify-between px-5 py-3.5 hover:surface transition-colors group">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
                   {/* File icon */}
                   <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/10 to-violet-500/10 flex items-center justify-center">
@@ -164,8 +164,8 @@ export default function KnowledgePage() {
                   </div>
                   {/* Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-white/70 truncate">{doc.name}</p>
-                    <div className="flex items-center space-x-2 text-[10px] text-white/30 mt-0.5">
+                    <p className="text-sm font-medium text-muted truncate">{doc.name}</p>
+                    <div className="flex items-center space-x-2 text-[10px] text-subtle mt-0.5">
                       <span>{formatSize(doc.size)}</span>
                       {doc.chunks && <><span>•</span><span>{doc.chunks} chunks</span></>}
                       <span>•</span>
@@ -201,7 +201,7 @@ export default function KnowledgePage() {
             <p className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent from-cyan-400 to-violet-400">
               {stat.value}
             </p>
-            <p className="text-[10px] text-white/30 mt-1">{stat.label}</p>
+            <p className="text-[10px] text-subtle mt-1">{stat.label}</p>
           </div>
         ))}
       </div>
