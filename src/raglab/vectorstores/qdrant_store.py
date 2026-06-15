@@ -17,28 +17,50 @@ from raglab.core.types import Chunk, ScoredChunk, Vector
 
 _DISTANCE = {"cosine": "Cosine", "dot": "Dot", "euclid": "Euclid"}
 
+# Qdrant's embedded (local path) mode takes an exclusive lock on the whole
+# directory, so a process may only hold ONE client per path even across
+# collections. We therefore cache and share clients keyed by their target
+# (server url or on-disk path). ``:memory:`` is deliberately never cached: each
+# in-memory client is its own isolated database, which tests rely on.
+_CLIENT_CACHE: dict[str, Any] = {}
+
 
 def build_qdrant_client(
     url: str | None = None, location: str | None = None, timeout: int = 60
 ) -> Any:
-    """Create a QdrantClient with RAGLab's connection precedence (most explicit
-    wins): config ``url`` > config ``location`` (``:memory:`` or a path) > env
-    ``QDRANT_URL`` > in-memory. An explicit ``location`` beats the ambient
+    """Create (or reuse) a QdrantClient with RAGLab's connection precedence (most
+    explicit wins): config ``url`` > config ``location`` (``:memory:`` or a path) >
+    env ``QDRANT_URL`` > in-memory. An explicit ``location`` beats the ambient
     ``QDRANT_URL`` so ``:memory:`` is never silently redirected to a server.
-    Shared by the RAG vector store and the memory vector index.
+    Server- and path-backed clients are cached per target so the RAG vector store,
+    the memory vector index, and concurrent requests share one connection.
     """
 
     from qdrant_client import QdrantClient
 
     api_key = os.environ.get("QDRANT_API_KEY")
+
+    def _cached(key: str, factory: Any) -> Any:
+        client = _CLIENT_CACHE.get(key)
+        if client is None:
+            client = factory()
+            _CLIENT_CACHE[key] = client
+        return client
+
     if url:
-        return QdrantClient(url=url, api_key=api_key, timeout=timeout)
+        return _cached(
+            f"url:{url}", lambda: QdrantClient(url=url, api_key=api_key, timeout=timeout)
+        )
     if location == ":memory:":
         return QdrantClient(location=":memory:", timeout=timeout)
     if location:
-        return QdrantClient(path=location, timeout=timeout)
+        path = os.path.abspath(location)
+        return _cached(f"path:{path}", lambda: QdrantClient(path=path, timeout=timeout))
     if os.environ.get("QDRANT_URL"):
-        return QdrantClient(url=os.environ["QDRANT_URL"], api_key=api_key, timeout=timeout)
+        env_url = os.environ["QDRANT_URL"]
+        return _cached(
+            f"url:{env_url}", lambda: QdrantClient(url=env_url, api_key=api_key, timeout=timeout)
+        )
     return QdrantClient(location=":memory:", timeout=timeout)
 
 

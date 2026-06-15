@@ -23,3 +23,7 @@ docs/ROADMAP.md
 # Generated artifacts
 graphify-out/
 qdrant_storage/
+uploads/
+*.db
+*.db-shm
+*.db-wal
