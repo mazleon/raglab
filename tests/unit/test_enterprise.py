@@ -39,6 +39,36 @@ def test_apply_overrides_rejects_bad_embedding():
         apply_overrides(base, {"embedding": {"name": "openrouter"}})
 
 
+def test_overrides_clear_stale_embedding_dim_on_provider_switch():
+    """Switching embedding provider must not inherit the base provider's dim/model
+    (the bug that sized a 384-dim collection then queried it with 3072-dim vectors)."""
+    from raglab.core.config import load_config
+    from raglab.core.overrides import apply_overrides
+
+    base = load_config("configs/pipelines/hybrid.yaml")  # hashing, dim 384
+    assert base.embedding.name == "hashing" and base.embedding.dim == 384
+    merged = apply_overrides(base, {"embedding": {"name": "openai"}})
+    assert merged.embedding.name == "openai"
+    assert merged.embedding.dim is None  # 384 must NOT leak
+    assert merged.embedding.model is None
+
+
+def test_session_config_pins_model_and_dim_aware_collection():
+    from raglab.server.sessions import build_session_config
+
+    # Offline default: hashing → dim-suffixed collection.
+    naive = build_session_config(tenant_id="acme", pipeline="naive", overrides={})
+    assert naive.collection == "rag_acme_hashing_384"
+
+    # Provider switch resolves a deterministic model + its native dim (1536),
+    # never the leaked 384 — so upload and chat agree.
+    openai = build_session_config(
+        tenant_id="acme", pipeline="hybrid", overrides={"embedding": {"name": "openai"}}
+    )
+    assert openai.embedding.model == "text-embedding-3-small"
+    assert openai.collection == "rag_acme_openai_1536"
+
+
 def test_sanitize_overrides_drops_unknown_keys():
     from raglab.core.overrides import sanitize_overrides
 
