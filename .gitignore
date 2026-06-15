@@ -27,3 +27,5 @@ uploads/
 *.db
 *.db-shm
 *.db-wal
+*.log
+nohup.out
