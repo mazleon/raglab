@@ -21,9 +21,9 @@ from typing import Any
 import yaml
 
 from raglab.core.config import build_llm, config_from_dict
+from raglab.core.registry import create as registry_create
 from raglab.core.utils import deep_merge
 from raglab.errors import RaglabError
-from raglab.evaluation.builtin import evaluate_builtin
 from raglab.evaluation.reports import write_csv, write_html
 from raglab.llms.metered import MeteredLLM
 from raglab.service import build_engine
@@ -86,16 +86,16 @@ def _evaluate(
     (metrics, judge_cost_usd, judge_tokens, errors).
     """
 
-    metrics: dict[str, Any] = evaluate_builtin(records, builtin_metrics)
+    metrics: dict[str, Any] = registry_create(
+        "evaluator", "builtin", metric_names=builtin_metrics
+    ).evaluate(records)
     errors: list[str] = []
     judge_cost = 0.0
     judge_tokens = 0
 
     if eval_cfg.get("ragas"):
         try:
-            from raglab.evaluation.ragas_eval import RagasEvaluator
-
-            metrics.update(RagasEvaluator().evaluate(records))
+            metrics.update(registry_create("evaluator", "ragas").evaluate(records))
         except Exception as e:  # noqa: BLE001 - never abort the matrix on one evaluator
             msg = f"ragas: {type(e).__name__}: {e}"
             logger.warning(msg)
@@ -103,8 +103,6 @@ def _evaluate(
 
     judges = eval_cfg.get("judges", [])
     if judges:
-        from raglab.evaluation.llm_judges import LLMJudge
-
         judge_raw = eval_cfg.get("judge_llm") or raw_cfg.get("llm", {})
         try:
             judge_cfg = config_from_dict({"llm": judge_raw}).llm
@@ -116,7 +114,10 @@ def _evaluate(
         delay_s = float(eval_cfg.get("judge_delay_s", 0.0))
         for dimension in judges:
             try:
-                metrics.update(LLMJudge(dimension, metered).evaluate(records, delay_s=delay_s))
+                judge = registry_create(
+                    "evaluator", "llm_judge", dimension=dimension, llm=metered
+                )
+                metrics.update(judge.evaluate(records, delay_s=delay_s))
             except RaglabError as e:
                 msg = f"judge[{dimension}]: {e}"
                 logger.warning(msg)

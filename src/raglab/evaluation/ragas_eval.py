@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from raglab.core.registry import register
+
 _DEFAULT_METRICS = [
     "faithfulness",
     "answer_relevancy",
@@ -16,6 +18,7 @@ _DEFAULT_METRICS = [
 ]
 
 
+@register("evaluator", "ragas")
 class RagasEvaluator:
     def __init__(self, metrics: list[str] | None = None, llm: Any = None) -> None:
         self.metric_names = metrics or _DEFAULT_METRICS
