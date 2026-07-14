@@ -10,12 +10,12 @@ If unsupported, regenerate once constrained to the strongest supporting doc.
 
 from __future__ import annotations
 
-from raglab.agents.critic import critique_answer
 from raglab.core.registry import register
 from raglab.core.text import content_tokens
 from raglab.core.types import RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning.critic import critique_answer
 
 
 def _isrel(query: str, contexts: list[ScoredChunk]) -> list[ScoredChunk]:

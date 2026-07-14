@@ -8,13 +8,13 @@ web/secondary knowledge fallback), then generate over the combined evidence.
 
 from __future__ import annotations
 
-from raglab.agents.grading import grade_retrieval
-from raglab.agents.rewrite import rewrite_query
 from raglab.core.registry import register
 from raglab.core.text import content_tokens
 from raglab.core.types import Chunk, RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning.grading import grade_retrieval
+from raglab.reasoning.rewrite import rewrite_query
 
 
 def _refine(query: str, contexts: list[ScoredChunk]) -> list[ScoredChunk]:

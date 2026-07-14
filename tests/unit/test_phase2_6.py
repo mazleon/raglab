@@ -1,12 +1,12 @@
 """Unit tests for Phase 2 (GraphRAG), Phase 4 (chunkers), Phase 6 (compressed)."""
 
-from raglab.agents.reasoning import classify_complexity, decompose, identify_gaps
 from raglab.core.config import build_embedder, build_vectorstore, load_config
 from raglab.core.registry import create
 from raglab.core.types import Chunk, Document, ScoredChunk
 from raglab.experiments.catalog import list_experiments, save_experiments
 from raglab.graph.store import NetworkXGraphStore
 from raglab.ingestion.pipeline import IngestionPipeline
+from raglab.reasoning import classify_complexity, decompose, identify_gaps
 
 
 def test_graph_store_builds_and_traverses():

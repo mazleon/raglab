@@ -1,7 +1,19 @@
-"""Reasoning helpers: complexity routing, query decomposition, gap analysis.
+"""Reasoning primitives for agentic RAG.
 
-All have deterministic, offline heuristics so every architecture runs without an
-LLM. Each is a pure function over the query/context text.
+These are the lightweight, mostly-heuristic helpers the agentic architectures
+share — retrieval grading, answer critique, query rewrite, and the query-
+reasoning steps (complexity routing, decomposition, gap analysis). Each has a
+deterministic offline path so every pipeline runs without an LLM; an LLM can be
+layered on where it matters.
+
+Public surface (re-exported here for ``from raglab.reasoning import ...``):
+
+* :func:`classify_complexity`, :func:`decompose`, :func:`identify_gaps` — query
+  reasoning (defined in this module).
+* :func:`grade_retrieval`, :class:`GradeResult` — see :mod:`raglab.reasoning.grading`.
+* :func:`critique_answer`, :func:`attach_citations`, :class:`CritiqueResult` —
+  :mod:`raglab.reasoning.critic`.
+* :func:`rewrite_query` — :mod:`raglab.reasoning.rewrite`.
 """
 
 from __future__ import annotations
@@ -10,6 +22,21 @@ import re
 
 from raglab.core.text import content_tokens
 from raglab.core.types import ScoredChunk
+from raglab.reasoning.critic import CritiqueResult, attach_citations, critique_answer
+from raglab.reasoning.grading import GradeResult, grade_retrieval
+from raglab.reasoning.rewrite import rewrite_query
+
+__all__ = [
+    "CritiqueResult",
+    "GradeResult",
+    "attach_citations",
+    "classify_complexity",
+    "critique_answer",
+    "decompose",
+    "grade_retrieval",
+    "identify_gaps",
+    "rewrite_query",
+]
 
 _SUBQ_SPLIT = re.compile(r"\s+and\s+|\s*;\s*|\?\s*")
 

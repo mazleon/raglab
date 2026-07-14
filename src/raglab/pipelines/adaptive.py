@@ -4,10 +4,10 @@ complex — so cost/latency scale with difficulty."""
 
 from __future__ import annotations
 
-from raglab.agents.reasoning import classify_complexity
 from raglab.core.registry import create, register
 from raglab.core.types import RAGResult, TrajectoryStep
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning import classify_complexity
 
 _ROUTE = {"simple": "naive_rag", "moderate": "hybrid_rag", "complex": "agentic_rag"}
 

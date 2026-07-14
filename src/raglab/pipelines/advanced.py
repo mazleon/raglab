@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
-from raglab.agents.reasoning import decompose
 from raglab.core.registry import register
 from raglab.core.types import RAGResult, RunMetrics, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning import decompose
 from raglab.retrievers.fusion import reciprocal_rank_fusion
 
 

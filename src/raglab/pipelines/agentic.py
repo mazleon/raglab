@@ -15,15 +15,15 @@ from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
 
-from raglab.agents import (
+from raglab.core.registry import register
+from raglab.core.types import RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
+from raglab.pipelines.base import BasePipeline, build_messages
+from raglab.reasoning import (
     attach_citations,
     critique_answer,
     grade_retrieval,
     rewrite_query,
 )
-from raglab.core.registry import register
-from raglab.core.types import RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
-from raglab.pipelines.base import BasePipeline, build_messages
 
 
 class AgentState(TypedDict):
