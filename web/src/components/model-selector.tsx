@@ -42,14 +42,14 @@ function SelectGroup<T extends { id: string; name: string; description: string; 
           )}
         >
           {items.length === 0 && (
-            <option value="" className="bg-slate-900 text-subtle">Loading...</option>
+            <option value="" className="surface-2 text-subtle">Loading...</option>
           )}
           {items.map((item) => (
             <option
               key={item.id}
               value={item.id}
               disabled={item.available === false}
-              className="bg-slate-900"
+              className="surface-2"
             >
               {item.name}{item.available === false ? ' (config required)' : ''}
             </option>

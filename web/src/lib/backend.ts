@@ -1,3 +1,4 @@
+import 'server-only'
 import type { NextRequest } from 'next/server'
 
 /** Base URL of the FastAPI backend (server-side only). */

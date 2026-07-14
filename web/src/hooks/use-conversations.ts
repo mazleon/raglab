@@ -1,7 +1,7 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Conversation, StoredMessage } from '@/types'
+import type { Conversation } from '@/types'
 
 async function fetchConversations(): Promise<Conversation[]> {
   const res = await fetch('/api/conversations', { cache: 'no-store' })
@@ -15,23 +15,6 @@ export function useConversations() {
     queryKey: ['conversations'],
     queryFn: fetchConversations,
     staleTime: 1000 * 30,
-  })
-}
-
-export interface ConversationDetail extends Conversation {
-  messages: StoredMessage[]
-}
-
-export function useConversation(id: string | null) {
-  return useQuery({
-    queryKey: ['conversation', id],
-    enabled: !!id,
-    queryFn: async (): Promise<ConversationDetail | null> => {
-      if (!id) return null
-      const res = await fetch(`/api/conversations/${id}`, { cache: 'no-store' })
-      if (!res.ok) return null
-      return res.json()
-    },
   })
 }
 

@@ -77,7 +77,7 @@ export default function KnowledgePage() {
             className="appearance-none border border-base rounded-xl surface text-xs text-muted px-3 py-2 pr-7 focus:outline-none focus:border-cyan-500/40 cursor-pointer"
           >
             {(config?.embeddings ?? [{ id: 'hashing', name: 'Hashing (Offline)', available: true }]).map((e) => (
-              <option key={e.id} value={e.id} disabled={e.available === false} className="bg-slate-900">
+              <option key={e.id} value={e.id} disabled={e.available === false} className="surface-2">
                 {e.name}{e.available === false ? ' (key required)' : ''}
               </option>
             ))}
