@@ -16,10 +16,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from raglab.accounts import documents as docstore
 from raglab.accounts.auth import User
+from raglab.accounts.documents import DocumentRecord
 from raglab.errors import RaglabError
-from raglab.ingestion import store as docstore
-from raglab.ingestion.store import DocumentRecord
 from raglab.server.deps import current_user
 from raglab.server.sessions import build_session_config, ingest_file
 

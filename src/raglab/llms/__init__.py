@@ -1,3 +1,3 @@
 """LLM adapters."""
 
-from raglab.llms import echo, gemini_llm, openai_compat  # noqa: F401
+from raglab.llms import echo_llm, gemini_llm, openai_llm  # noqa: F401

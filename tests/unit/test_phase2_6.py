@@ -4,7 +4,7 @@ from raglab.agents.reasoning import classify_complexity, decompose, identify_gap
 from raglab.core.config import build_embedder, build_vectorstore, load_config
 from raglab.core.registry import create
 from raglab.core.types import Chunk, Document, ScoredChunk
-from raglab.experiments.store import list_experiments, save_experiments
+from raglab.experiments.catalog import list_experiments, save_experiments
 from raglab.graph.store import NetworkXGraphStore
 from raglab.ingestion.pipeline import IngestionPipeline
 

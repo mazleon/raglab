@@ -213,7 +213,7 @@ def run_benchmark(bench_path: str | Path) -> list[dict[str, Any]]:
     write_html(rows, output_dir / "leaderboard-latest.html")
 
     # Persist to the experiment store so runs accumulate across sessions.
-    from raglab.experiments.store import save_experiments
+    from raglab.experiments.catalog import save_experiments
 
     save_experiments(rows, str(output_dir / "experiments.db"))
     return rows

@@ -1,23 +1,24 @@
 """Non-streaming query + benchmark + experiment endpoints.
 
-``/query`` mirrors the CLI: run one architecture over a config and return the
-answer, contexts, metrics, and trajectory. It now also accepts inline
-``overrides`` so callers can swap the model/embedding/retriever without a YAML.
+``/query`` mirrors ``/chat`` and ``/documents``: it composes a **tenant-scoped**
+engine through :mod:`raglab.server.sessions` (so the collection it queries is the
+one a tenant's uploads land in) and requires an authenticated user. Inline
+``overrides`` let callers swap model/embedding/retriever without a YAML.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from raglab.core.config import load_config
-from raglab.core.overrides import apply_overrides
+from raglab.accounts.auth import User
 from raglab.evaluation.reports import write_html
-from raglab.experiments.store import DEFAULT_DB, list_experiments
-from raglab.service import build_engine
+from raglab.experiments.catalog import DEFAULT_DB, list_experiments
+from raglab.server.deps import current_user
+from raglab.server.sessions import build_session_config, get_engine, ingest_file
 
 router = APIRouter(tags=["query"])
 
@@ -42,13 +43,18 @@ class BenchmarkRequest(BaseModel):
 
 
 @router.post("/query", response_model=QueryResponse)
-def query(req: QueryRequest) -> QueryResponse:
-    try:
-        cfg = load_config(req.config)
-    except FileNotFoundError as e:
-        raise HTTPException(404, f"config not found: {req.config}") from e
-    cfg = apply_overrides(cfg, req.overrides)
-    engine = build_engine(cfg, ingest_path=req.ingest_path)
+def query(req: QueryRequest, user: User = Depends(current_user)) -> QueryResponse:
+    cfg = build_session_config(
+        tenant_id=user.tenant_id,
+        config_path=req.config,
+        overrides=req.overrides,
+    )
+    engine = get_engine(cfg)
+    if req.ingest_path:
+        try:
+            ingest_file(cfg, req.ingest_path)
+        except FileNotFoundError as e:
+            raise HTTPException(404, f"ingest path not found: {req.ingest_path}") from e
     result = engine.answer(req.query)
     return QueryResponse(
         architecture=result.architecture,
