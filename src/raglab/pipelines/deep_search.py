@@ -7,11 +7,11 @@ coverage before a final synthesis. Bounded by ``agent.max_retrieval_retries``.
 
 from __future__ import annotations
 
-from raglab.agents.reasoning import identify_gaps
 from raglab.core.registry import register
 from raglab.core.types import RAGResult, RunMetrics, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning import identify_gaps
 
 
 @register("architecture", "deep_search_rag")

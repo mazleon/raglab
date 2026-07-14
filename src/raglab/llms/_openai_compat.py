@@ -1,8 +1,9 @@
-"""OpenAI and OpenRouter chat adapters.
+"""Shared base for OpenAI Chat-Completions-compatible LLM adapters.
 
-Both speak the OpenAI Chat Completions API, so they share one implementation;
-OpenRouter just points at a different base_url and key. Token usage from the
-response drives cost via the price table.
+OpenAI and OpenRouter speak the same API, so both concrete adapters subclass this
+one base. Keeping the base here (rather than inside ``openai_llm.py``) means each
+provider file imports a named, non-private module — no cross-file reach into
+another adapter's internals.
 
 The ``openai`` SDK is imported lazily so the package still imports (and the whole
 offline slice still runs) when the ``providers`` extra is not installed.
@@ -15,7 +16,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from raglab.core.registry import register
 from raglab.core.types import LLMResponse
 from raglab.errors import (
     MissingDependencyError,
@@ -31,7 +31,14 @@ def _status(exc: Exception) -> int | None:
     return getattr(exc, "status_code", None) or getattr(exc, "code", None)
 
 
-class _OpenAICompatLLM:
+class OpenAICompatLLM:
+    """Base for any LLM that talks the OpenAI Chat Completions API.
+
+    Subclasses set the class attributes (``_default_model``, ``_base_url``,
+    ``_api_key_env``, ``_provider``) and register themselves; the behaviour is
+    identical otherwise.
+    """
+
     _default_model = ""
     _base_url: str | None = None
     _api_key_env = "OPENAI_API_KEY"
@@ -57,7 +64,7 @@ class _OpenAICompatLLM:
                 from openai import OpenAI
             except ImportError as e:
                 raise MissingDependencyError(
-                    "OpenAI/OpenRouter need the 'providers' extra: "
+                    f"{self._provider} needs the 'providers' extra: "
                     "pip install 'raglab[providers]'"
                 ) from e
             api_key = os.environ.get(self._api_key_env)
@@ -156,20 +163,3 @@ class _OpenAICompatLLM:
             completion_tokens=ct,
             usd_cost=cost_usd(self._model, pt, ct),
         )
-
-
-@register("llm", "openai")
-class OpenAILLM(_OpenAICompatLLM):
-    _default_model = "gpt-4o-mini"
-    _api_key_env = "OPENAI_API_KEY"
-    _provider = "openai"
-
-
-@register("llm", "openrouter")
-class OpenRouterLLM(_OpenAICompatLLM):
-    # A reliable, low-cost default. Free ``:free`` slugs are rate-limited and
-    # frequently require the paid slug, so they are a poor default.
-    _default_model = "deepseek/deepseek-chat"
-    _base_url = "https://openrouter.ai/api/v1"
-    _api_key_env = "OPENROUTER_API_KEY"
-    _provider = "openrouter"

@@ -3,11 +3,11 @@ each hop, accumulate the evidence, then synthesize a final grounded answer."""
 
 from __future__ import annotations
 
-from raglab.agents.reasoning import decompose
 from raglab.core.registry import register
 from raglab.core.types import RAGResult, RunMetrics, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning import decompose
 
 
 @register("architecture", "multi_hop_rag")
@@ -19,7 +19,7 @@ class MultiHopRAG(BasePipeline):
         traj: list[TrajectoryStep] = []
         cfg = self.c.config
         with timer(metrics):
-            subqs = decompose(query, max_subs=3, llm=self.c.llm)
+            subqs = decompose(query, max_subs=3)
             traj.append(TrajectoryStep("decompose", f"{len(subqs)} hops"))
 
             evidence = []

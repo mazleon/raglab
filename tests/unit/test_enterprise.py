@@ -120,6 +120,11 @@ def client(tmp_path_factory):
     from raglab.api import app
     from raglab.server import sessions
 
+    # api.py calls ensure_loaded() at import, which re-injects QDRANT_URL from
+    # .env (cloud) *after* the pop above. Re-pop now that .env is loaded so the
+    # suite stays offline (ensure_loaded is idempotent — won't reload).
+    os.environ.pop("QDRANT_URL", None)
+
     sessions.reset_cache()
     return TestClient(app)
 

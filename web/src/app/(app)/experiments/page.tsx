@@ -17,8 +17,8 @@ export default function ExperimentsPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-red-600 dark:text-red-400">Error loading experiments</div>
-        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        <div className="text-red-500">Error loading experiments</div>
+        <div className="text-sm text-muted mt-2">
           {(error as Error).message}
         </div>
       </div>

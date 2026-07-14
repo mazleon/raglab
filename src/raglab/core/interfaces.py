@@ -40,6 +40,13 @@ class Chunker(Protocol):
 
 
 @runtime_checkable
+class Cleaner(Protocol):
+    """Normalises parsed document text before chunking (whitespace, drop empties)."""
+
+    def clean(self, docs: list[Document]) -> list[Document]: ...
+
+
+@runtime_checkable
 class Embedder(Protocol):
     """Maps text to dense vectors."""
 

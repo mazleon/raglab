@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Any
 
 from raglab.core.config import ExperimentConfig, config_from_dict
+from raglab.core.utils import deep_merge
 
 # Only these top-level sections may be overridden from an untrusted client. This
 # is an allow-list on purpose: it keeps request payloads from reaching into
@@ -27,20 +28,6 @@ _ALLOWED_SECTIONS = {
     "chunker",
     "agent",
 }
-
-
-def _deep_merge(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
-    """Recursively merge ``patch`` into a copy of ``base`` (patch wins)."""
-
-    out = dict(base)
-    for key, value in patch.items():
-        if value is None:
-            continue
-        if isinstance(value, dict) and isinstance(out.get(key), dict):
-            out[key] = _deep_merge(out[key], value)
-        else:
-            out[key] = value
-    return out
 
 
 def sanitize_overrides(overrides: dict[str, Any] | None) -> dict[str, Any]:
@@ -86,5 +73,5 @@ def apply_overrides(
         if "dim" not in emb:
             base_data["embedding"]["dim"] = None
 
-    merged = _deep_merge(base_data, clean)
+    merged = deep_merge(base_data, clean)
     return config_from_dict(merged)

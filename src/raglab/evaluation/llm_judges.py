@@ -12,6 +12,7 @@ import time
 from typing import Any
 
 from raglab.core.interfaces import LLM
+from raglab.core.registry import register
 
 _FLOAT = re.compile(r"[01](?:\.\d+)?")
 
@@ -38,6 +39,7 @@ _RUBRICS: dict[str, str] = {
 }
 
 
+@register("evaluator", "llm_judge")
 class LLMJudge:
     def __init__(self, dimension: str, llm: LLM) -> None:
         if dimension not in _RUBRICS:

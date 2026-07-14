@@ -24,6 +24,7 @@ _REGISTRY: dict[str, dict[str, type]] = defaultdict(dict)
 _IMPL_PACKAGES = (
     "raglab.ingestion.parsers",
     "raglab.ingestion.chunkers",
+    "raglab.ingestion.cleaners",
     "raglab.embeddings",
     "raglab.vectorstores",
     "raglab.retrievers",

@@ -1,22 +1,29 @@
-"""GraphRAG interfaces (Phase 2 — Neo4j-backed implementation lands later).
+"""GraphRAG interfaces.
 
-The ``graph_rag`` and ``kg_vector_rag`` architectures are already registered as
-stubs in ``raglab.pipelines.stubs``. This module defines the contracts a future
-graph store/retriever will implement so the rest of the platform can target them
-today.
+Defines the :class:`GraphStore` contract — a knowledge graph built from chunks
+(entities + relationships) — and imports the implementations so they register.
+The ``graph_rag`` and ``kg_vector_rag`` architectures consume a registered
+graphstore via the composition root.
 """
 
 from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
-from raglab.core.types import Document, ScoredChunk
+from raglab.core.types import Chunk, Document, ScoredChunk
 from raglab.graph import neo4j_store, store  # noqa: F401  (registers graphstores)
 
 
 @runtime_checkable
 class GraphStore(Protocol):
-    """A knowledge graph built from documents (entities + relationships)."""
+    """A knowledge graph built from chunks (entities + relationships).
+
+    The real build entry point is :meth:`build_from_chunks` — pipelines call it
+    with the vector store's chunks. :meth:`build` is a thin convenience wrapper
+    that parses documents to chunks first.
+    """
+
+    def build_from_chunks(self, chunks: list[Chunk]) -> None: ...
 
     def build(self, docs: list[Document]) -> None: ...
 

@@ -14,6 +14,7 @@ from raglab.core.config import (
     Components,
     ExperimentConfig,
     build_chunker,
+    build_cleaner,
     build_components,
     build_pipeline_from_components,
 )
@@ -35,6 +36,7 @@ class Engine:
             build_chunker(self.config.chunker),
             self.components.embedder,
             self.components.store,
+            cleaner=build_cleaner(self.config.cleaner),
         )
         return ing.ingest(path).chunks
 

@@ -1,6 +1,6 @@
 """SQLite connection + schema bootstrap for the accounts subsystem.
 
-Plain ``sqlite3`` (no ORM), matching ``raglab.experiments.store``. A single file
+Plain ``sqlite3`` (no ORM), matching ``raglab.experiments.catalog``. A single file
 holds tenants, users, conversations, and messages. ``WAL`` mode keeps concurrent
 reads (the web app) from blocking the writer.
 """

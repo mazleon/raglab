@@ -44,6 +44,8 @@ class BasePipeline:
     def _generate(
         self, query: str, contexts: list[ScoredChunk], metrics: RunMetrics
     ) -> LLMResponse:
-        resp = self.c.llm.generate(build_messages(query, contexts))
-        metrics.add_llm(resp)
-        return resp
+        # Delegate to the canonical :func:`raglab.pipelines.helpers.generate`
+        # (imported locally to avoid a base <-> helpers import cycle).
+        from raglab.pipelines.helpers import generate
+
+        return generate(self.c, query, contexts, metrics)

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, type ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
 import { LeftNav } from './left-nav'
 import { CommandPalette } from './command-palette'
 import { UserMenu } from './user-menu'
@@ -12,17 +11,9 @@ interface AppShellProps {
   children: ReactNode
 }
 
-const BARE_ROUTES = ['/login', '/register']
-
 export function AppShell({ children }: AppShellProps) {
   const [isLeftNavOpen, setIsLeftNavOpen] = useState(false)
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
-  const pathname = usePathname()
-
-  // Auth pages render without the app chrome.
-  if (BARE_ROUTES.some((r) => pathname?.startsWith(r))) {
-    return <div className="min-h-screen space-bg">{children}</div>
-  }
 
   return (
     <div className="h-screen flex flex-col space-bg">

@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import type { Experiment } from '@/types'
+import { apiGet } from '@/lib/api'
 
 interface ExperimentsResponse {
   experiments: Experiment[]
@@ -9,11 +10,7 @@ interface ExperimentsResponse {
 }
 
 async function fetchExperiments(): Promise<Experiment[]> {
-  const response = await fetch('/api/experiments')
-  if (!response.ok) {
-    throw new Error('Failed to fetch experiments')
-  }
-  const data = (await response.json()) as ExperimentsResponse
+  const data = await apiGet<ExperimentsResponse>('/api/experiments')
   return data.experiments ?? []
 }
 

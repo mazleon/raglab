@@ -3,11 +3,11 @@ revise once using that reflection as steering."""
 
 from __future__ import annotations
 
-from raglab.agents.critic import critique_answer
 from raglab.core.registry import register
 from raglab.core.types import RAGResult, RunMetrics, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning.critic import critique_answer
 
 
 @register("architecture", "reflective_rag")

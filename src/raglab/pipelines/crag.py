@@ -8,21 +8,22 @@ web/secondary knowledge fallback), then generate over the combined evidence.
 
 from __future__ import annotations
 
-from raglab.agents.grading import _content_tokens, grade_retrieval
-from raglab.agents.rewrite import rewrite_query
 from raglab.core.registry import register
+from raglab.core.text import content_tokens
 from raglab.core.types import Chunk, RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
+from raglab.reasoning.grading import grade_retrieval
+from raglab.reasoning.rewrite import rewrite_query
 
 
 def _refine(query: str, contexts: list[ScoredChunk]) -> list[ScoredChunk]:
     """Knowledge refinement: keep only sentences overlapping the query."""
 
-    q = _content_tokens(query)
+    q = content_tokens(query)
     refined: list[ScoredChunk] = []
     for sc in contexts:
-        sents = [s for s in sc.text.split(". ") if _content_tokens(s) & q]
+        sents = [s for s in sc.text.split(". ") if content_tokens(s) & q]
         text = ". ".join(sents) if sents else sc.text
         refined.append(ScoredChunk(Chunk(text, sc.chunk.metadata, sc.chunk.chunk_id,
                                           sc.chunk.document_id), sc.score))
