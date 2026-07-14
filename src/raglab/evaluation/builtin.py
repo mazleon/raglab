@@ -9,24 +9,15 @@ A record is: {"question", "answer", "contexts": list[str], "ground_truth"}.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 
-_TOKEN = re.compile(r"[a-z0-9]+")
-_STOP = {
-    "the", "a", "an", "is", "are", "of", "to", "and", "in", "on", "for", "what",
-    "does", "do", "how", "why", "which", "that", "this", "with", "as", "by", "it",
-}
-
-
-def _toks(text: str) -> set[str]:
-    return {t for t in _TOKEN.findall((text or "").lower()) if t not in _STOP}
+from raglab.core.text import content_tokens
 
 
 def _ctx_tokens(record: dict) -> set[str]:
     out: set[str] = set()
     for c in record.get("contexts", []):
-        out |= _toks(c)
+        out |= content_tokens(c)
     return out
 
 
@@ -36,14 +27,15 @@ def answer_nonempty(record: dict) -> float:
 
 
 def context_recall_proxy(record: dict) -> float:
-    gt = _toks(record.get("ground_truth", ""))
+    gt = content_tokens(record.get("ground_truth", ""))
     if not gt:
         return 0.0
     return round(len(gt & _ctx_tokens(record)) / len(gt), 3)
 
 
 def answer_relevancy_proxy(record: dict) -> float:
-    ans, gt = _toks(record.get("answer", "")), _toks(record.get("ground_truth", ""))
+    ans = content_tokens(record.get("answer", ""))
+    gt = content_tokens(record.get("ground_truth", ""))
     if not ans or not gt:
         return 0.0
     inter = len(ans & gt)
@@ -55,7 +47,7 @@ def answer_relevancy_proxy(record: dict) -> float:
 
 
 def faithfulness_proxy(record: dict) -> float:
-    ans, ctx = _toks(record.get("answer", "")), _ctx_tokens(record)
+    ans, ctx = content_tokens(record.get("answer", "")), _ctx_tokens(record)
     if not ans:
         return 0.0
     return round(len(ans & ctx) / len(ans), 3)

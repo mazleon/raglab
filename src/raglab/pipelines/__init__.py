@@ -14,5 +14,4 @@ from raglab.pipelines import (  # noqa: F401
     naive,
     reflective,
     self_rag,
-    stubs,
 )

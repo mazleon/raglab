@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from raglab.agents.grading import _content_tokens
+from raglab.core.text import content_tokens
 from raglab.core.types import ScoredChunk
 
 
@@ -22,10 +22,10 @@ def critique_answer(
 
     if not answer.strip() or answer.strip().lower().startswith("i don't know"):
         return CritiqueResult(False, "empty or non-committal answer")
-    ans = _content_tokens(answer)
+    ans = content_tokens(answer)
     ctx = set()
     for sc in contexts:
-        ctx |= _content_tokens(sc.text)
+        ctx |= content_tokens(sc.text)
     if ans and not (ans & ctx):
         return CritiqueResult(False, "answer not grounded in context")
     return CritiqueResult(True, "answer grounded")

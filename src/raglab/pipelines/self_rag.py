@@ -11,16 +11,16 @@ If unsupported, regenerate once constrained to the strongest supporting doc.
 from __future__ import annotations
 
 from raglab.agents.critic import critique_answer
-from raglab.agents.grading import _content_tokens
 from raglab.core.registry import register
+from raglab.core.text import content_tokens
 from raglab.core.types import RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
 from raglab.pipelines import helpers
 from raglab.pipelines.base import BasePipeline
 
 
 def _isrel(query: str, contexts: list[ScoredChunk]) -> list[ScoredChunk]:
-    q = _content_tokens(query)
-    relevant = [sc for sc in contexts if _content_tokens(sc.text) & q]
+    q = content_tokens(query)
+    relevant = [sc for sc in contexts if content_tokens(sc.text) & q]
     return relevant or contexts[:1]
 
 

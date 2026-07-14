@@ -21,6 +21,7 @@ from typing import Any
 import yaml
 
 from raglab.core.config import build_llm, config_from_dict
+from raglab.core.utils import deep_merge
 from raglab.errors import RaglabError
 from raglab.evaluation.builtin import evaluate_builtin
 from raglab.evaluation.reports import write_csv, write_html
@@ -28,16 +29,6 @@ from raglab.llms.metered import MeteredLLM
 from raglab.service import build_engine
 
 logger = logging.getLogger("raglab.benchmark")
-
-
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-    out = deepcopy(base)
-    for k, v in override.items():
-        if isinstance(v, dict) and isinstance(out.get(k), dict):
-            out[k] = _deep_merge(out[k], v)
-        else:
-            out[k] = deepcopy(v)
-    return out
 
 
 def expand_matrix(bench: dict[str, Any]) -> list[dict[str, Any]]:
@@ -52,7 +43,7 @@ def expand_matrix(bench: dict[str, Any]) -> list[dict[str, Any]]:
     configs: list[dict[str, Any]] = []
     for combo in combos:
         cell = {keys[i]: combo[i] for i in range(len(keys))}
-        cfg = _deep_merge(base, cell)
+        cfg = deep_merge(base, cell)
         cfg.setdefault("collection", collection)
         configs.append(cfg)
     return configs

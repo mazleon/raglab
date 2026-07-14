@@ -17,7 +17,7 @@ class AdaptiveRAG(BasePipeline):
     name = "adaptive_rag"
 
     def run(self, query: str) -> RAGResult:
-        complexity = classify_complexity(query, self.c.llm)
+        complexity = classify_complexity(query)
         target = _ROUTE[complexity]
         delegate = create("architecture", target, components=self.c)
         result = delegate.run(query)

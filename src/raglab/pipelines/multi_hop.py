@@ -19,7 +19,7 @@ class MultiHopRAG(BasePipeline):
         traj: list[TrajectoryStep] = []
         cfg = self.c.config
         with timer(metrics):
-            subqs = decompose(query, max_subs=3, llm=self.c.llm)
+            subqs = decompose(query, max_subs=3)
             traj.append(TrajectoryStep("decompose", f"{len(subqs)} hops"))
 
             evidence = []

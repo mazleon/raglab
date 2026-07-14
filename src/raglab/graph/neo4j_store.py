@@ -110,4 +110,4 @@ class Neo4jGraphStore:
         return self._chunks_for(list(reached), limit=hops * 4 + 4)
 
     def communities(self) -> list[dict[str, Any]]:  # pragma: no cover
-        return []
+        raise NotImplementedError("Neo4j community detection is not yet implemented")
