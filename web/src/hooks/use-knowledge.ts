@@ -2,11 +2,14 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Document } from '@/types'
+import { apiGet, apiPost, apiPostForm, apiDelete } from '@/lib/api'
+
+interface DocumentsResponse { documents: Document[] }
+interface DocumentResponse { document: Document }
+interface IngestBody { ingest_path: string; config?: string }
 
 async function fetchDocuments(): Promise<Document[]> {
-  const res = await fetch('/api/documents')
-  if (!res.ok) throw new Error('Failed to fetch documents')
-  const data = await res.json()
+  const data = await apiGet<DocumentsResponse>('/api/documents')
   return data.documents ?? []
 }
 
@@ -19,37 +22,17 @@ async function uploadDocument({ file, embedding = 'hashing' }: UploadArgs): Prom
   const formData = new FormData()
   formData.append('file', file)
   formData.append('embedding', embedding)
-  const res = await fetch('/api/documents', {
-    method: 'POST',
-    body: formData,
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Upload failed' }))
-    throw new Error(err.error)
-  }
-  const data = await res.json()
+  const data = await apiPostForm<DocumentResponse>('/api/documents', formData)
   return data.document
 }
 
 async function deleteDocument(id: string): Promise<void> {
-  const res = await fetch('/api/documents', {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  })
-  if (!res.ok) throw new Error('Failed to delete document')
+  // The /api/documents DELETE handler takes the id in the JSON body.
+  await apiDelete('/api/documents', { id })
 }
 
 async function triggerIngestion(ingestPath: string, config?: string): Promise<void> {
-  const res = await fetch('/api/ingest', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ingest_path: ingestPath, config }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Ingestion failed' }))
-    throw new Error(err.error)
-  }
+  await apiPost('/api/ingest', { ingest_path: ingestPath, config } as IngestBody)
 }
 
 export function useDocuments() {

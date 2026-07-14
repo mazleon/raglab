@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import type { ModelOption, EmbeddingOption, PipelineOption } from '@/types'
+import { apiGet } from '@/lib/api'
 
 export interface ConfigData {
   models: ModelOption[]
@@ -13,16 +14,10 @@ export interface ConfigData {
   default_pipeline: string
 }
 
-async function fetchConfig(): Promise<ConfigData> {
-  const res = await fetch('/api/config')
-  if (!res.ok) throw new Error('Failed to fetch configuration')
-  return res.json()
-}
-
 export function useConfig() {
   return useQuery({
     queryKey: ['config'],
-    queryFn: fetchConfig,
+    queryFn: () => apiGet<ConfigData>('/api/config'),
     staleTime: 1000 * 60 * 10, // 10 minutes — config rarely changes
   })
 }

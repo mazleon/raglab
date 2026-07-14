@@ -2,12 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Conversation } from '@/types'
+import { apiGet, apiDelete } from '@/lib/api'
+
+interface ConversationsResponse { conversations: Conversation[] }
 
 async function fetchConversations(): Promise<Conversation[]> {
-  const res = await fetch('/api/conversations', { cache: 'no-store' })
-  if (!res.ok) return []
-  const data = await res.json()
-  return data.conversations ?? []
+  try {
+    const data = await apiGet<ConversationsResponse>('/api/conversations')
+    return data.conversations ?? []
+  } catch {
+    // Listing is best-effort: show an empty sidebar rather than an error state.
+    return []
+  }
 }
 
 export function useConversations() {
@@ -21,9 +27,7 @@ export function useConversations() {
 export function useDeleteConversation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (id: string) => {
-      await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
-    },
+    mutationFn: (id: string) => apiDelete(`/api/conversations/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['conversations'] }),
   })
 }
