@@ -17,7 +17,7 @@ from langgraph.graph import END, StateGraph
 
 from raglab.core.registry import register
 from raglab.core.types import RAGResult, RunMetrics, ScoredChunk, TrajectoryStep, timer
-from raglab.pipelines.base import BasePipeline, build_messages
+from raglab.pipelines.base import BasePipeline
 from raglab.reasoning import (
     attach_citations,
     critique_answer,
@@ -94,8 +94,9 @@ class AgenticRAG(BasePipeline):
         return state
 
     def _generate(self, state: AgentState) -> AgentState:  # type: ignore[override]
-        resp = self.c.llm.generate(build_messages(state["query"], state["contexts"]))
-        state["metrics"].add_llm(resp)
+        from raglab.pipelines.helpers import generate
+
+        resp = generate(self.c, state["query"], state["contexts"], state["metrics"])
         state["answer"] = resp.text
         state["trajectory"].append(TrajectoryStep("generate", resp.model))
         return state
