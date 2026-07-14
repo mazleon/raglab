@@ -36,6 +36,11 @@ class ChunkerCfg(BaseModel):
     options: dict[str, Any] = Field(default_factory=dict)
 
 
+class CleanerCfg(BaseModel):
+    name: str = "default"  # default (whitespace/empty-doc normaliser)
+    options: dict[str, Any] = Field(default_factory=dict)
+
+
 class VectorStoreCfg(BaseModel):
     name: str = "qdrant"
     url: str | None = None
@@ -102,6 +107,7 @@ class ExperimentConfig(BaseModel):
     collection: str = "raglab"
     architecture: str = "naive_rag"
     chunker: ChunkerCfg = Field(default_factory=ChunkerCfg)
+    cleaner: CleanerCfg = Field(default_factory=CleanerCfg)
     embedding: EmbeddingCfg = Field(default_factory=EmbeddingCfg)
     vectorstore: VectorStoreCfg = Field(default_factory=VectorStoreCfg)
     retrieval: RetrievalCfg = Field(default_factory=RetrievalCfg)
@@ -155,6 +161,10 @@ def build_chunker(cfg: ChunkerCfg) -> Any:
         overlap=cfg.overlap,
         **cfg.options,
     )
+
+
+def build_cleaner(cfg: CleanerCfg) -> Any:
+    return registry.create("cleaner", cfg.name, **cfg.options)
 
 
 def build_embedder(cfg: EmbeddingCfg) -> Embedder:

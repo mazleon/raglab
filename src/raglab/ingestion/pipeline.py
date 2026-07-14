@@ -8,12 +8,13 @@ from pathlib import Path
 from raglab.core.config import (
     ExperimentConfig,
     build_chunker,
+    build_cleaner,
     build_embedder,
     build_vectorstore,
 )
-from raglab.core.interfaces import Chunker, Embedder, VectorStore
+from raglab.core.interfaces import Chunker, Cleaner, Embedder, VectorStore
 from raglab.core.types import Chunk
-from raglab.ingestion.cleaners import clean_documents
+from raglab.ingestion.cleaners import DefaultCleaner
 from raglab.ingestion.enrich import enrich
 from raglab.ingestion.parsers import parse_path
 
@@ -30,18 +31,24 @@ class IngestResult:
 
 class IngestionPipeline:
     def __init__(
-        self, chunker: Chunker, embedder: Embedder, store: VectorStore
+        self,
+        chunker: Chunker,
+        embedder: Embedder,
+        store: VectorStore,
+        cleaner: Cleaner | None = None,
     ) -> None:
         self.chunker = chunker
         self.embedder = embedder
         self.store = store
+        self.cleaner: Cleaner = cleaner or DefaultCleaner()
 
     @classmethod
     def from_config(cls, config: ExperimentConfig) -> IngestionPipeline:
         embedder = build_embedder(config.embedding)
         store = build_vectorstore(config.vectorstore, config.collection, embedder.dim)
         chunker = build_chunker(config.chunker)
-        return cls(chunker, embedder, store)
+        cleaner = build_cleaner(config.cleaner)
+        return cls(chunker, embedder, store, cleaner=cleaner)
 
     def _iter_files(self, path: Path):
         if path.is_file():
@@ -57,7 +64,7 @@ class IngestionPipeline:
         documents = []
         for f in files:
             documents.extend(parse_path(f))
-        documents = clean_documents(documents)
+        documents = self.cleaner.clean(documents)
 
         chunks: list[Chunk] = enrich(self.chunker.chunk(documents))
         if chunks:
